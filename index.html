@@ -4,12 +4,12 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1"/>
 <title>APEXRX — Bilateral Patellar Tendon Repair</title>
-<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@400;700;900&family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400;1,600&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@400;600;700;900&family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400;1,600&display=swap" rel="stylesheet"/>
 <style>
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-html,body{height:100%;background:#080c14;-webkit-tap-highlight-color:transparent}
-input,select,textarea,button{font-family:inherit;-webkit-appearance:none;appearance:none}
-textarea{resize:vertical}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; background: #f5f7fa; -webkit-tap-highlight-color: transparent; }
+input, select, textarea, button { font-family: inherit; -webkit-appearance: none; appearance: none; }
+textarea { resize: vertical; }
 </style>
 </head>
 <body>
@@ -18,125 +18,132 @@ textarea{resize:vertical}
 <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.2/babel.min.js"></script>
 <script type="text/babel">
-
 const { useState, useEffect, useRef } = React;
 
-// ── PALETTE ──────────────────────────────────────────────────────────────────
-const C = {
-  black:"#080c14", obs:"#0d1220", char:"#131928", iron:"#1e2d4a", steel:"#2e4268",
-  ash:"#6a7fa8", bone:"#b8c4d8", white:"#eef2fa",
-  goldDeep:"#7a5800", gold:"#b88a00", goldMid:"#d4a820", goldBright:"#f0c840", goldPale:"#faeaa8",
-  red:"#c0392b", redLight:"#e05040", green:"#1a6640", greenLight:"#27a060",
-  blue:"#1a3a6a", blueLight:"#3a70c0", warn:"#8a6010", warnLight:"#e0a030",
+// ── TYPE SCALE ────────────────────────────────────────────────────────────────
+// Designed for iPhone readability including elderly users.
+// Cormorant renders small — all sizes are intentionally large.
+const TS = {
+  display: 52,    // Hero numbers, screen titles
+  heading: 32,    // Card headers, phase names
+  subhead: 26,    // Section subheaders
+  label:   18,    // ALL CAPS labels, tab text
+  labelSm: 16,    // Secondary labels, metadata
+  body:    22,    // ALL primary reading text
+  bodySm:  20,    // Secondary body, notes, descriptions
+  caption: 17,    // Captions, disclaimers, fine print
 };
 
-const bb = "'Bebas Neue',sans-serif";
+// ── PALETTE — White & Navy ────────────────────────────────────────────────────
+const C = {
+  // Page
+  page:     "#f5f7fa",
+  white:    "#ffffff",
+  offwhite: "#f0f3f8",
+
+  // Navy (header, footer, accents)
+  navyDeep: "#061428",
+  navy:     "#0d1e3d",
+  navyMid:  "#1a3a6a",
+  navyLight:"#2a5298",
+  navyPale: "#e8edf5",
+
+  // Text
+  textPrimary:   "#0d1e3d",
+  textSecondary: "#4a5568",
+  textMuted:     "#8a9ab5",
+  textLight:     "#b8c4d8",
+
+  // Borders
+  border:    "#dde3ee",
+  borderMid: "#c0cce0",
+
+  // Gold — primary brand accent
+  goldDeep:  "#8a6200",
+  gold:      "#c49a00",
+  goldMid:   "#e0b800",
+  goldBright:"#f5cc00",
+  goldPale:  "#fff8d6",
+
+  // Status colors — vivid on white
+  red:       "#c0392b",
+  redLight:  "#e74c3c",
+  redPale:   "#fdecea",
+  green:     "#1a7a40",
+  greenLight:"#27ae60",
+  greenPale: "#eafaf1",
+  blue:      "#1a5276",
+  blueLight: "#2980b9",
+  bluePale:  "#ebf5fb",
+  orange:    "#d35400",
+  orangeLight:"#e67e22",
+  orangePale:"#fef5ec",
+  teal:      "#117a65",
+  tealLight: "#1abc9c",
+  tealPale:  "#e8faf6",
+  warn:      "#7d6608",
+  warnLight: "#d4ac0d",
+  warnPale:  "#fefde0",
+};
+
+const bb  = "'Bebas Neue',sans-serif";
 const bar = "'Barlow Condensed',sans-serif";
 const cor = "'Cormorant Garamond',Georgia,serif";
 
-// ── SURGERY REGISTRY ─────────────────────────────────────────────────────────
-// Each surgery type defines its ROM configuration and metadata.
-// To add a new surgery type in the future, add an entry here — nothing else changes.
+// ── SURGERY REGISTRY ──────────────────────────────────────────────────────────
 const SURGERY_TYPES = {
   bilateral_patellar_tendon: {
     label: "Bilateral Patellar Tendon Repair",
     short: "Bilateral PTR",
     rom: {
-      mode: "bilateral",       // "bilateral" | "single"
+      mode: "bilateral",
       sides: ["Left","Right"],
-      joint: "Knee",
-      metric: "Flexion",
-      unit: "°",
+      joint: "Knee", metric: "Flexion", unit: "°",
       min: 0, max: 150, step: 5,
       phaseTargets: { 1:60, 2:90, 3:120, 4:135, 5:145 },
-      chartColors: { Left:"#3a70c0", Right:"#d4a820" },
+      chartColors: { Left:"#2980b9", Right:"#e0b800" },
     },
   },
   tkr_right: {
-    label: "Total Knee Replacement — Right",
-    short: "TKR Right",
-    rom: {
-      mode: "single",
-      sides: ["Right"],
-      joint: "Knee",
-      metric: "Flexion",
-      unit: "°",
-      min: 0, max: 150, step: 5,
-      phaseTargets: { 1:60, 2:90, 3:110, 4:120, 5:130 },
-      chartColors: { Right:"#d4a820" },
-    },
+    label: "Total Knee Replacement — Right", short: "TKR Right",
+    rom: { mode:"single", sides:["Right"], joint:"Knee", metric:"Flexion", unit:"°", min:0, max:150, step:5, phaseTargets:{1:60,2:90,3:110,4:120,5:130}, chartColors:{Right:"#e0b800"} },
   },
   tkr_left: {
-    label: "Total Knee Replacement — Left",
-    short: "TKR Left",
-    rom: {
-      mode: "single",
-      sides: ["Left"],
-      joint: "Knee",
-      metric: "Flexion",
-      unit: "°",
-      min: 0, max: 150, step: 5,
-      phaseTargets: { 1:60, 2:90, 3:110, 4:120, 5:130 },
-      chartColors: { Left:"#3a70c0" },
-    },
-  },
-  acl_right: {
-    label: "ACL Reconstruction — Right",
-    short: "ACL Right",
-    rom: {
-      mode: "single",
-      sides: ["Right"],
-      joint: "Knee",
-      metric: "Flexion",
-      unit: "°",
-      min: 0, max: 150, step: 5,
-      phaseTargets: { 1:90, 2:120, 3:135, 4:145, 5:150 },
-      chartColors: { Right:"#d4a820" },
-    },
-  },
-  shoulder_right: {
-    label: "Rotator Cuff Repair — Right",
-    short: "RCR Right",
-    rom: {
-      mode: "single",
-      sides: ["Right"],
-      joint: "Shoulder",
-      metric: "Abduction",
-      unit: "°",
-      min: 0, max: 180, step: 5,
-      phaseTargets: { 1:30, 2:90, 3:120, 4:150, 5:180 },
-      chartColors: { Right:"#d4a820" },
-    },
+    label: "Total Knee Replacement — Left", short: "TKR Left",
+    rom: { mode:"single", sides:["Left"], joint:"Knee", metric:"Flexion", unit:"°", min:0, max:150, step:5, phaseTargets:{1:60,2:90,3:110,4:120,5:130}, chartColors:{Left:"#2980b9"} },
   },
 };
 
-// ── ACTIVE SURGERY CONFIG ─────────────────────────────────────────────────────
-// Change this one line to switch the entire app to a different surgery type.
 const ACTIVE_SURGERY_KEY = "bilateral_patellar_tendon";
 const ACTIVE_SURGERY = SURGERY_TYPES[ACTIVE_SURGERY_KEY];
 const ROM_CONFIG = ACTIVE_SURGERY.rom;
 
-// ── DATA ─────────────────────────────────────────────────────────────────────
+// ── DATA ──────────────────────────────────────────────────────────────────────
 const SURGERY_DATE = new Date("2026-03-16");
 
 const PHASES = [
-  { id:1, name:"Acute Protection", weeks:"Wks 1–2", start:0, end:14, icon:"🛡️", color:C.red, accent:C.redLight,
+  { id:1, name:"Acute Protection", weeks:"Wks 1–2", start:0, end:14, icon:"🛡️",
+    color:C.red, accent:C.redLight, pale:C.redPale, border:C.red,
     travelRisk:"high", travelNote:"No travel. Elevation, ice, and rest are non-negotiable.",
     goals:["Ice & elevation 20 min on/off","Keep surgical site clean and dry","Full knee extension — no pillows under knees","Quad sets isometric: 10×3/day","Straight leg raises with brace locked","PWB with crutches per surgeon protocol","Pain management per prescribed regimen","Sleep with brace on as directed"],
     milestones:["Swelling trending down","Pain controlled without PRN meds","Full passive extension achieved"] },
-  { id:2, name:"Early Mobilization", weeks:"Wks 3–6", start:14, end:42, icon:"🦵", color:C.warn, accent:C.warnLight,
+  { id:2, name:"Early Mobilization", weeks:"Wks 3–6", start:14, end:42, icon:"🦵",
+    color:C.orange, accent:C.orangeLight, pale:C.orangePale, border:C.orange,
     travelRisk:"high", travelNote:"Avoid travel. DVT risk elevated. Prolonged sitting contraindicated.",
     goals:["ROM progression: 0–90° by Week 6","Wean off crutches as WB progresses","SLR without brace when quad control achieved","Stationary bike low resistance","Patellar mobilization — superior/inferior glides","TKEs, mini-squats","Scar tissue management once incisions closed","Continue elevation and ice post-exercise"],
     milestones:["Full weight bearing without crutches","ROM 0–90°","No extension lag on SLR","Off crutches"] },
-  { id:3, name:"Strength Building", weeks:"Wks 7–12", start:42, end:84, icon:"💪", color:C.goldDeep, accent:C.goldMid,
+  { id:3, name:"Strength Building", weeks:"Wks 7–12", start:42, end:84, icon:"💪",
+    color:C.warn, accent:C.warnLight, pale:C.warnPale, border:C.warn,
     travelRisk:"moderate", travelNote:"Short trips possible with planning. Aisle seats, compression socks, walk every 60 min.",
     goals:["ROM target 0–120° by Week 10","Leg press bilateral → unilateral","Step-ups and step-downs 4″→8″","Pool walking / aquatic therapy","Balance: single-leg stance","Hamstring curls, hip strengthening","Stationary bike increased resistance","Normalize gait pattern"],
     milestones:["ROM 0–120°","Single-leg stance 30 sec","Step-down without pain","Normal gait confirmed"] },
-  { id:4, name:"Functional Return", weeks:"Wks 13–20", start:84, end:140, icon:"🔄", color:C.gold, accent:C.goldBright,
+  { id:4, name:"Functional Return", weeks:"Wks 13–20", start:84, end:140, icon:"🔄",
+    color:C.teal, accent:C.tealLight, pale:C.tealPale, border:C.teal,
     travelRisk:"low", travelNote:"Travel appropriate. Aisle seats, compression socks, plan walking breaks.",
     goals:["Full ROM restoration 0–135°+","Eccentric quad loading: decline squats","Bilateral squat to parallel","Light jogging on flat surface","Lateral movements and COD","Sport/activity-specific training","Quad strength symmetry >80% LSI","Return-to-work unrestricted"],
     milestones:["Full ROM","Jog 10 min without pain",">80% LSI quad strength","Cleared for full activity"] },
-  { id:5, name:"Summit", weeks:"Wks 21–52", start:140, end:365, icon:"🏔️", color:C.goldMid, accent:C.goldPale,
+  { id:5, name:"Summit", weeks:"Wks 21–52", start:140, end:365, icon:"🏔️",
+    color:C.green, accent:C.greenLight, pale:C.greenPale, border:C.green,
     travelRisk:"none", travelNote:"No restrictions. Travel freely.",
     goals:["Advanced plyometrics: box jumps, bounding","Full sport/recreational activity","Bilateral quad strength symmetry >90%","Maintain patellar tendon loading program lifelong","Golf, hiking, all pursuits unrestricted","Annual check-in with surgeon/PT"],
     milestones:["Return to all activities",">90% strength symmetry","No pain with daily activities","Back to the moments that matter."] },
@@ -172,7 +179,7 @@ const REASSURANCES = [
 ];
 
 const SYMPTOM_FLAGS = [
-  { label:"Fever over 101°F", severity:"call", icon:"🌡️", action:"Call your surgeon's line today." },
+  { label:"Fever over 101°F", severity:"urgent", icon:"🌡️", action:"Call your surgeon's line today. Fever post-op requires evaluation." },
   { label:"Excessive warmth/redness from incision", severity:"call", icon:"🔴", action:"May indicate infection. Call surgeon's office — same-day evaluation." },
   { label:"Sudden sharp pain increase", severity:"call", icon:"⚡", action:"Could indicate re-tear. Do not push through. Call your care team." },
   { label:"Calf pain or swelling (one leg worse)", severity:"urgent", icon:"🚨", action:"Possible DVT. Call your surgeon immediately or go to urgent care." },
@@ -191,265 +198,282 @@ const NORMAL_LIBRARY = [
   { q:"My sleep is terrible. Is that normal?", a:"Extremely common. Pain disrupts deep sleep cycles, narcotics alter sleep architecture. Improves significantly by weeks 3–4." },
   { q:"I feel emotionally low. Is that just me?", a:"Not just you. Post-surgical depression is clinically recognized. It typically peaks around days 5–14. Tell your care team if it persists. It is treatable and temporary." },
   { q:"My incision itches badly.", a:"Good sign — itching means nerve regeneration and healing. Do not scratch. Keep the area moisturized once cleared by your surgeon." },
-  { q:"Is it normal to hear clicking or popping?", a:"Often yes — gas bubbles releasing from the joint, scar tissue moving. Painless pops are usually benign. A painful clunk with giving way is different — report that." },
-  { q:"How long until I can drive?", a:"Typically 6–12 weeks depending on which leg and your surgeon's protocol. Never drive while on narcotic pain medication regardless of timeline." },
+  { q:"Is it normal to hear clicking or popping?", a:"Often yes — gas bubbles releasing, scar tissue moving. Painless pops are usually benign. A painful clunk with giving way is different — report that." },
+  { q:"How long until I can drive?", a:"Typically 6–12 weeks depending on which leg and your surgeon's protocol. Never drive while on narcotic pain medication." },
 ];
 
-const RISK_COLOR = { high:C.redLight, moderate:C.warnLight, low:C.greenLight, none:C.goldBright };
+const RISK_COLOR = { high:C.redLight, moderate:C.orangeLight, low:C.greenLight, none:C.tealLight };
 const RISK_LABEL = { high:"❌ Avoid Travel", moderate:"⚠️ Limited Travel", low:"✅ Travel OK", none:"✅ Unrestricted" };
+const RISK_PALE  = { high:C.redPale, moderate:C.orangePale, low:C.greenPale, none:C.tealPale };
 
-// ── HELPERS ──────────────────────────────────────────────────────────────────
-const daysSince = () => {
-  const t = new Date(); t.setHours(0,0,0,0);
-  const s = new Date(SURGERY_DATE); s.setHours(0,0,0,0);
-  return Math.floor((t - s) / 86400000);
-};
-const getPhase = (d) => PHASES.find(p => d >= p.start && d < p.end) || PHASES[d >= 365 ? 4 : 0];
-const fmtDate = (d) => d.toLocaleDateString("en-US", { month:"short", day:"numeric" });
-const fmtTime = (s) => {
-  if (s <= 0) return "00:00";
-  const h = Math.floor(s/3600), m = Math.floor((s%3600)/60), sec = s%60;
-  return h > 0 ? `${h}:${String(m).padStart(2,"0")}:${String(sec).padStart(2,"0")}` : `${String(m).padStart(2,"0")}:${String(sec).padStart(2,"0")}`;
-};
-const save = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} };
-const load = (k, def) => { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : def; } catch { return def; } };
-const saveRaw = (k, v) => { try { localStorage.setItem(k, v); } catch {} };
-const loadRaw = (k, def="") => { try { return localStorage.getItem(k) || def; } catch { return def; } };
+// ── HELPERS ───────────────────────────────────────────────────────────────────
+const daysSince = () => { const t=new Date(); t.setHours(0,0,0,0); const s=new Date(SURGERY_DATE); s.setHours(0,0,0,0); return Math.floor((t-s)/86400000); };
+const getPhase  = (d) => PHASES.find(p => d>=p.start && d<p.end) || PHASES[d>=365?4:0];
+const fmtDate   = (d) => d.toLocaleDateString("en-US",{month:"short",day:"numeric"});
+const fmtTime   = (s) => { if(s<=0)return"00:00"; const h=Math.floor(s/3600),m=Math.floor((s%3600)/60),sec=s%60; return h>0?`${h}:${String(m).padStart(2,"0")}:${String(sec).padStart(2,"0")}`:`${String(m).padStart(2,"0")}:${String(sec).padStart(2,"0")}`; };
+const save    = (k,v) => { try { localStorage.setItem(k,JSON.stringify(v)); } catch {} };
+const load    = (k,def) => { try { const v=localStorage.getItem(k); return v?JSON.parse(v):def; } catch { return def; } };
+const saveRaw = (k,v) => { try { localStorage.setItem(k,v); } catch {} };
+const loadRaw = (k,def="") => { try { return localStorage.getItem(k)||def; } catch { return def; } };
 
-// ── READINESS SCORE ───────────────────────────────────────────────────────────
+// ── READINESS ─────────────────────────────────────────────────────────────────
 function calcReadiness(checkins, checked, phase) {
   const recent = checkins.slice(-7);
-  if (recent.length === 0) return null;
-  const avgPain = recent.reduce((a,c) => a + c.pain, 0) / recent.length;
-  const painScore = Math.round(((10 - avgPain) / 9) * 40);
-  const swellMap = { better:1, same:0.5, worse:0 };
-  const swellScore = Math.round((recent.reduce((a,c) => a + (swellMap[c.swelling]||0.5), 0) / recent.length) * 20);
-  const done = phase.goals.filter((_,i) => checked[`${phase.id}-${i}`]).length;
-  const goalScore = phase.goals.length > 0 ? Math.round((done / phase.goals.length) * 20) : 10;
-  const moodMap = { great:1, ok:0.65, rough:0.35, bad:0 };
-  const moodScore = Math.round((recent.reduce((a,c) => a + (moodMap[c.mood]||0.5), 0) / recent.length) * 20);
-  const total = Math.min(100, painScore + swellScore + goalScore + moodScore);
-  let label, color, advice;
-  if (total >= 80) { label="Peak Readiness"; color=C.greenLight; advice="Push day. Your body is responding well — lean into your goals."; }
-  else if (total >= 60) { label="Building Momentum"; color=C.goldBright; advice="Solid foundation. Stay consistent and trust the process."; }
-  else if (total >= 40) { label="Active Recovery"; color=C.warnLight; advice="Rest day signals. Prioritize ice, elevation, and sleep tonight."; }
-  else { label="Rest & Recover"; color=C.redLight; advice="Your body is asking for a break. That's not failure — it's data."; }
-  return { total, label, color, advice, painScore, swellScore, goalScore, moodScore };
+  if (!recent.length) return null;
+  const avgPain    = recent.reduce((a,c)=>a+c.pain,0)/recent.length;
+  const painScore  = Math.round(((10-avgPain)/9)*40);
+  const swellMap   = {better:1,same:0.5,worse:0};
+  const swellScore = Math.round((recent.reduce((a,c)=>a+(swellMap[c.swelling]||0.5),0)/recent.length)*20);
+  const done       = phase.goals.filter((_,i)=>checked[`${phase.id}-${i}`]).length;
+  const goalScore  = phase.goals.length>0 ? Math.round((done/phase.goals.length)*20) : 10;
+  const moodMap    = {great:1,ok:0.65,rough:0.35,bad:0};
+  const moodScore  = Math.round((recent.reduce((a,c)=>a+(moodMap[c.mood]||0.5),0)/recent.length)*20);
+  const total      = Math.min(100,painScore+swellScore+goalScore+moodScore);
+  let label,color,pale,advice;
+  if (total>=80) { label="Peak Readiness"; color=C.greenLight; pale=C.greenPale; advice="Push day. Your body is responding well — lean into your goals."; }
+  else if(total>=60) { label="Building Momentum"; color=C.blueLight; pale=C.bluePale; advice="Solid foundation. Stay consistent and trust the process."; }
+  else if(total>=40) { label="Active Recovery"; color=C.orangeLight; pale=C.orangePale; advice="Rest day signals. Prioritize ice, elevation, and sleep tonight."; }
+  else { label="Rest & Recover"; color=C.redLight; pale=C.redPale; advice="Your body is asking for a break. That's not failure — it's data."; }
+  return { total, label, color, pale, advice, painScore, swellScore, goalScore, moodScore };
 }
 
 // ── CLAUDE API ────────────────────────────────────────────────────────────────
 async function callClaude(prompt) {
   try {
-    const res = await fetch("https://api.anthropic.com/v1/messages", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ model:"claude-sonnet-4-20250514", max_tokens:800, messages:[{ role:"user", content:prompt }] })
-    });
+    const res = await fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:800,messages:[{role:"user",content:prompt}]})});
     const data = await res.json();
     return data.content?.[0]?.text || "No response returned.";
-  } catch(e) {
-    return "AI reports are available once deployed to GitHub Pages. Your check-in data is being saved now.";
-  }
+  } catch { return "AI reports available once deployed to GitHub Pages."; }
 }
 
 // ── SHARED UI ─────────────────────────────────────────────────────────────────
-const Lbl = ({ children, color=C.goldMid, mb=8 }) => (
-  <div style={{ fontFamily:bar, fontSize:"10px", letterSpacing:"3px", textTransform:"uppercase", color, marginBottom:mb }}>{children}</div>
-);
-const Card = ({ children, border=C.iron, bg=C.obs, style={} }) => (
-  <div style={{ background:bg, border:`1px solid ${border}`, borderRadius:"3px", padding:"14px", marginBottom:"10px", ...style }}>{children}</div>
-);
-const Btn = ({ children, onClick, bg=C.goldMid, color=C.black, full=false, sm=false, disabled=false, style={} }) => (
-  <button onClick={onClick} disabled={disabled} style={{ background:disabled?C.steel:bg, border:"none", color:disabled?C.ash:color, borderRadius:"3px", padding:sm?"9px 14px":"13px 20px", fontSize:sm?"11px":"13px", fontFamily:bar, letterSpacing:"2px", textTransform:"uppercase", fontWeight:"700", cursor:disabled?"not-allowed":"pointer", width:full?"100%":"auto", opacity:disabled?0.6:1, ...style }}>{children}</button>
-);
-const Ghost = ({ children, onClick, color=C.ash, style={} }) => (
-  <button onClick={onClick} style={{ background:"transparent", border:`1px solid ${C.iron}`, color, borderRadius:"3px", padding:"8px 14px", fontSize:"11px", fontFamily:bar, letterSpacing:"1px", cursor:"pointer", ...style }}>{children}</button>
-);
-const Inp = ({ value, onChange, placeholder, type="text", style={} }) => (
-  <input type={type} value={value} onChange={onChange} placeholder={placeholder} style={{ width:"100%", background:C.char, border:`1px solid ${C.iron}`, borderRadius:"3px", padding:"11px 12px", color:C.white, fontSize:"15px", fontFamily:cor, outline:"none", ...style }} />
-);
-const TA = ({ value, onChange, placeholder, rows=4 }) => (
-  <textarea value={value} onChange={onChange} placeholder={placeholder} rows={rows} style={{ width:"100%", background:C.char, border:`1px solid ${C.iron}`, borderRadius:"3px", padding:"11px 12px", color:C.white, fontSize:"15px", fontFamily:cor, outline:"none", resize:"vertical" }} />
-);
+function Lbl({ children, color=C.navyMid, mb=10 }) {
+  return <div style={{fontFamily:bar,fontSize:TS.label,letterSpacing:"1px",textTransform:"uppercase",color,marginBottom:mb,fontWeight:900}}>{children}</div>;
+}
 
-// ── SVG ───────────────────────────────────────────────────────────────────────
-const Mark = ({ s=28 }) => (
-  <svg width={s} height={s} viewBox="0 0 280 355" fill="none">
-    <polygon fill={C.steel} points="38,294 138,156 164,178 92,274"/>
-    <polygon fill={C.iron} points="97,255 178,205 188,223 94,271"/>
-    <polygon fill={C.goldBright} points="140,156 164,178 153,196"/>
-    <polygon fill={C.goldBright} points="162,213 178,205 189,223 172,232"/>
-    <path fill={C.goldBright} d="M191 246 L223 241 L238 261 L250 292 C232 286 219 279 208 268 C199 258 193 252 191 246 Z"/>
-  </svg>
-);
+function Card({ children, border=C.border, bg=C.white, style={} }) {
+  return <div style={{background:bg,border:`1px solid ${border}`,borderRadius:"10px",padding:"18px",marginBottom:"12px",boxShadow:"0 1px 4px rgba(13,30,61,0.06)",...style}}>{children}</div>;
+}
 
-const Caduceus = ({ size=22, color=C.ash }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
-    <line x1="12" y1="3" x2="12" y2="21" stroke={color} strokeWidth="1.8" strokeLinecap="round"/>
-    <path d="M12 6 C9 4 6 5.5 7 8 C7.8 9.8 10 10 12 9" stroke={color} strokeWidth="1.5" strokeLinecap="round" fill="none"/>
-    <path d="M12 6 C15 4 18 5.5 17 8 C16.2 9.8 14 10 12 9" stroke={color} strokeWidth="1.5" strokeLinecap="round" fill="none"/>
-    <path d="M9.5 9 C7.5 11 7.5 13.5 9.5 14.5 C11.5 15.5 13 14 12.5 12 C12 10 10 9.5 11 11.5 C12 13.5 11 16 9.5 17 C8 18 8 20 9.5 21" stroke={color} strokeWidth="1.4" strokeLinecap="round" fill="none"/>
-    <path d="M14.5 9 C16.5 11 16.5 13.5 14.5 14.5 C12.5 15.5 11 14 11.5 12 C12 10 14 9.5 13 11.5 C12 13.5 13 16 14.5 17 C16 18 16 20 14.5 21" stroke={color} strokeWidth="1.4" strokeLinecap="round" fill="none"/>
-  </svg>
-);
+function Btn({ children, onClick, bg=C.navyMid, color=C.white, full=false, sm=false, disabled=false, style={} }) {
+  return (
+    <button onClick={onClick} disabled={disabled} style={{background:disabled?"#c0c8d8":bg,border:"none",color:disabled?"#8a9ab5":color,borderRadius:"8px",padding:sm?"10px 16px":"15px 22px",fontSize:sm?TS.labelSm:TS.label,fontFamily:bar,letterSpacing:"2px",textTransform:"uppercase",fontWeight:"700",cursor:disabled?"not-allowed":"pointer",width:full?"100%":"auto",opacity:1,...style}}>
+      {children}
+    </button>
+  );
+}
+
+function Ghost({ children, onClick, color=C.navyMid, style={} }) {
+  return <button onClick={onClick} style={{background:"transparent",border:`1.5px solid ${C.borderMid}`,color,borderRadius:"8px",padding:"10px 16px",fontSize:TS.labelSm,fontFamily:bar,letterSpacing:"1px",cursor:"pointer",...style}}>{children}</button>;
+}
+
+function Inp({ value, onChange, placeholder, type="text", style={} }) {
+  return <input type={type} value={value} onChange={onChange} placeholder={placeholder} style={{width:"100%",background:C.white,border:`1.5px solid ${C.borderMid}`,borderRadius:"8px",padding:"13px 14px",color:C.textPrimary,fontSize:TS.body,fontFamily:cor,outline:"none",...style}}/>;
+}
+
+function TA({ value, onChange, placeholder, rows=4 }) {
+  return <textarea value={value} onChange={onChange} placeholder={placeholder} rows={rows} style={{width:"100%",background:C.white,border:`1.5px solid ${C.borderMid}`,borderRadius:"8px",padding:"13px 14px",color:C.textPrimary,fontSize:TS.body,fontFamily:cor,outline:"none",resize:"vertical"}}/>;
+}
+
+function Badge({ children, color, bg }) {
+  return <span style={{fontFamily:bar,fontSize:TS.labelSm,letterSpacing:"1px",textTransform:"uppercase",fontWeight:700,color,background:bg,padding:"3px 10px",borderRadius:"20px"}}>{children}</span>;
+}
+
+// ── ICONS ─────────────────────────────────────────────────────────────────────
+function Mark({ s=28 }) {
+  return (
+    <svg width={s} height={s} viewBox="0 0 280 355" fill="none">
+      <polygon fill="rgba(255,255,255,0.3)" points="38,294 138,156 164,178 92,274"/>
+      <polygon fill="rgba(255,255,255,0.15)" points="97,255 178,205 188,223 94,271"/>
+      <polygon fill={C.goldBright} points="140,156 164,178 153,196"/>
+      <polygon fill={C.goldBright} points="162,213 178,205 189,223 172,232"/>
+      <path fill={C.goldBright} d="M191 246 L223 241 L238 261 L250 292 C232 286 219 279 208 268 C199 258 193 252 191 246 Z"/>
+    </svg>
+  );
+}
+
+function Caduceus({ size=22, color="#ffffff" }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+      <line x1="12" y1="3" x2="12" y2="21" stroke={color} strokeWidth="1.8" strokeLinecap="round"/>
+      <path d="M12 6 C9 4 6 5.5 7 8 C7.8 9.8 10 10 12 9" stroke={color} strokeWidth="1.5" strokeLinecap="round" fill="none"/>
+      <path d="M12 6 C15 4 18 5.5 17 8 C16.2 9.8 14 10 12 9" stroke={color} strokeWidth="1.5" strokeLinecap="round" fill="none"/>
+      <path d="M9.5 9 C7.5 11 7.5 13.5 9.5 14.5 C11.5 15.5 13 14 12.5 12 C12 10 10 9.5 11 11.5 C12 13.5 11 16 9.5 17 C8 18 8 20 9.5 21" stroke={color} strokeWidth="1.4" strokeLinecap="round" fill="none"/>
+      <path d="M14.5 9 C16.5 11 16.5 13.5 14.5 14.5 C12.5 15.5 11 14 11.5 12 C12 10 14 9.5 13 11.5 C12 13.5 13 16 14.5 17 C16 18 16 20 14.5 21" stroke={color} strokeWidth="1.4" strokeLinecap="round" fill="none"/>
+    </svg>
+  );
+}
+
+// ── SECTION HEADER ────────────────────────────────────────────────────────────
+function SectionHeader({ title, subtitle, accent=C.navyMid }) {
+  return (
+    <div style={{marginBottom:"16px"}}>
+      <div style={{fontFamily:bb,fontSize:TS.heading,letterSpacing:"2px",color:C.navy}}>{title}</div>
+      {subtitle && <div style={{fontFamily:cor,fontSize:TS.bodySm,fontStyle:"italic",color:C.textSecondary,marginTop:"3px"}}>{subtitle}</div>}
+      <div style={{height:"3px",width:"40px",background:accent,borderRadius:"2px",marginTop:"8px"}}/>
+    </div>
+  );
+}
 
 // ══════════════════════════════════════════════════════════════════════════════
 // HOME
 // ══════════════════════════════════════════════════════════════════════════════
-function HomeScreen({ days, phase, checkins, wins, checked, onCheckin, onNav }) {
-  const today = new Date().toDateString();
-  const todayCI = checkins.find(c => c.date === today);
-  const [pain, setPain] = useState(5);
+function HomeScreen({ days, phase, checkins, wins, checked, onCheckin, onNav, setScreen }) {
+  const today      = new Date().toDateString();
+  const todayCI    = checkins.find(c => c.date === today);
+  const [pain,     setPain]     = useState(5);
   const [swelling, setSwelling] = useState("same");
-  const [mood, setMood] = useState(null);
-
-  const weeks = Math.floor(days/7), xd = days%7;
-  const pct = Math.min((days/365)*100, 100);
+  const [mood,     setMood]     = useState(null);
+  const weeks    = Math.floor(days/7), xd = days%7;
+  const pct      = Math.min((days/365)*100,100);
+  const recent7  = checkins.slice(-7);
+  const avgPain7 = recent7.length ? recent7.reduce((a,c)=>a+c.pain,0)/recent7.length : 5;
+  const pool     = QUOTES.filter(q=>q.phase===phase.id||q.phase==="all");
+  const tonePool = pool.filter(q=>q.tone===(avgPain7>=7?"warm":"gritty"));
+  const quote    = (tonePool.length?tonePool:pool)[days%(tonePool.length||pool.length)];
+  const lastCI   = checkins.length ? checkins[checkins.length-1] : null;
+  const gapDays  = lastCI ? Math.floor((new Date()-new Date(lastCI.date))/86400000) : 999;
+  const showGap  = gapDays>=2 && !todayCI;
+  const readiness = calcReadiness(checkins,checked,phase);
   const recentWins = wins.slice(-3).reverse();
 
-  const recent7 = checkins.slice(-7);
-  const avgPain7 = recent7.length ? recent7.reduce((a,c) => a+c.pain, 0)/recent7.length : 5;
-  const pool = QUOTES.filter(q => q.phase === phase.id || q.phase === "all");
-  const tonePool = pool.filter(q => q.tone === (avgPain7 >= 7 ? "warm" : "gritty"));
-  const activePool = tonePool.length ? tonePool : pool;
-  const quote = activePool[days % activePool.length];
+  const moods  = [{v:"great",icon:"😄",label:"Great"},{v:"ok",icon:"😐",label:"Okay"},{v:"rough",icon:"😔",label:"Rough"},{v:"bad",icon:"😣",label:"Bad"}];
+  const swOpts = [{v:"better",icon:"⬇️",label:"Better"},{v:"same",icon:"↔️",label:"Same"},{v:"worse",icon:"⬆️",label:"Worse"}];
 
-  const lastCI = checkins.length ? checkins[checkins.length-1] : null;
-  const daysSinceCI = lastCI ? Math.floor((new Date() - new Date(lastCI.date)) / 86400000) : 999;
-  const showGap = daysSinceCI >= 2 && !todayCI;
-
-  const readiness = calcReadiness(checkins, checked, phase);
-
-  const moods = [{ v:"great",icon:"😄",label:"Great" },{ v:"ok",icon:"😐",label:"Okay" },{ v:"rough",icon:"😔",label:"Rough" },{ v:"bad",icon:"😣",label:"Bad" }];
-  const swOpts = [{ v:"better",icon:"⬇️",label:"Better" },{ v:"same",icon:"↔️",label:"Same" },{ v:"worse",icon:"⬆️",label:"Worse" }];
-
-  const getResp = (p,s,m) => {
-    if (p >= 8) return { msg:"High pain day. Rest, ice, elevate. This is the work.", color:C.redLight };
-    if (p <= 3 && s === "better") return { msg:"You're trending the right direction. The body is healing.", color:C.greenLight };
-    if (m === "bad" || m === "rough") return { msg:"Hard days are part of this. You don't have to feel good to make progress.", color:C.warnLight };
-    if (s === "worse") return { msg:"Increased swelling — prioritize elevation today.", color:C.warnLight };
-    return { msg:"Solid day. Keep doing what you're doing. Consistency wins.", color:C.goldBright };
-  };
-  const resp = todayCI ? getResp(todayCI.pain, todayCI.swelling, todayCI.mood) : null;
+  function getResp(p,s,m) {
+    if(p>=8) return {msg:"High pain day. Rest, ice, elevate. This is the work.",color:C.redLight,bg:C.redPale};
+    if(p<=3&&s==="better") return {msg:"You're trending the right direction. The body is healing.",color:C.green,bg:C.greenPale};
+    if(m==="bad"||m==="rough") return {msg:"Hard days are part of this. You don't have to feel good to make progress.",color:C.orange,bg:C.orangePale};
+    if(s==="worse") return {msg:"Increased swelling — prioritize elevation today.",color:C.orange,bg:C.orangePale};
+    return {msg:"Solid day. Keep doing what you're doing. Consistency wins.",color:C.teal,bg:C.tealPale};
+  }
+  const resp = todayCI ? getResp(todayCI.pain,todayCI.swelling,todayCI.mood) : null;
 
   return (
-    <div style={{ padding:"14px 14px 80px", maxWidth:640, margin:"0 auto" }}>
+    <div style={{padding:"16px 16px 90px",maxWidth:640,margin:"0 auto"}}>
 
       {showGap && (
-        <div style={{ background:`${C.blue}30`, border:`1px solid ${C.blueLight}`, borderRadius:"3px", padding:"12px 14px", marginBottom:"10px", display:"flex", gap:"10px", alignItems:"center" }}>
-          <span style={{ fontSize:"20px" }}>👋</span>
+        <div style={{background:C.bluePale,border:`1.5px solid ${C.blueLight}`,borderRadius:"10px",padding:"14px 16px",marginBottom:"12px",display:"flex",gap:"12px",alignItems:"center"}}>
+          <span style={{fontSize:"24px"}}>👋</span>
           <div>
-            <div style={{ fontFamily:bar, fontSize:"12px", letterSpacing:"1px", color:C.blueLight, textTransform:"uppercase" }}>It's been {daysSinceCI} days since your last check-in</div>
-            <div style={{ fontFamily:cor, fontSize:"13px", fontStyle:"italic", color:C.ash, marginTop:"3px" }}>How are you doing? Log today below.</div>
+            <div style={{fontFamily:bar,fontSize:TS.label,color:C.blueLight,textTransform:"uppercase",fontWeight:700}}>{gapDays >= 2 && lastCI ? `It's been ${gapDays} days since your last check-in` : "Check-in Requested"}</div>
+            <div style={{fontFamily:cor,fontSize:TS.bodySm,fontStyle:"italic",color:C.textSecondary,marginTop:"3px"}}>How are you doing? Log today below.</div>
           </div>
         </div>
       )}
 
-      {/* Hero counter */}
-      <div style={{ position:"relative", overflow:"hidden", background:`linear-gradient(145deg,${C.blue} 0%,${C.char} 100%)`, border:`1px solid ${C.iron}`, borderRadius:"3px", padding:"22px 20px 18px", marginBottom:"10px", textAlign:"center" }}>
-        <div style={{ position:"absolute", inset:0, background:`radial-gradient(ellipse 70% 50% at 50% 100%,${C.goldDeep}50 0%,transparent 70%)`, pointerEvents:"none" }}/>
-        <div style={{ fontFamily:bb, fontSize:"clamp(48px,12vw,72px)", letterSpacing:"4px", color:C.goldBright, lineHeight:1, position:"relative", zIndex:1 }}>{days}</div>
-        <div style={{ fontFamily:bar, fontSize:"11px", letterSpacing:"4px", color:C.ash, textTransform:"uppercase", marginTop:"2px", position:"relative", zIndex:1 }}>Days Post-Op</div>
-        <div style={{ fontFamily:bar, fontSize:"10px", letterSpacing:"2px", color:C.goldMid, textTransform:"uppercase", marginTop:"8px", position:"relative", zIndex:1 }}>{phase.icon} {phase.name} · {weeks}w {xd}d</div>
-        <div style={{ height:"3px", background:C.iron, borderRadius:"2px", marginTop:"14px", overflow:"hidden", position:"relative", zIndex:1 }}>
-          <div style={{ width:`${pct}%`, height:"100%", background:`linear-gradient(90deg,${C.gold},${C.goldBright})` }}/>
+      {/* Hero — navy gradient */}
+      <div style={{position:"relative",overflow:"hidden",background:`linear-gradient(135deg,${C.navyDeep} 0%,${C.navyMid} 100%)`,borderRadius:"14px",padding:"28px 22px 22px",marginBottom:"12px",textAlign:"center",boxShadow:"0 4px 20px rgba(13,30,61,0.25)"}}>
+        <div style={{position:"absolute",inset:0,background:`radial-gradient(ellipse 60% 40% at 50% 110%,${C.goldMid}30 0%,transparent 70%)`,pointerEvents:"none"}}/>
+        <div style={{fontFamily:bb,fontSize:"clamp(60px,15vw,88px)",letterSpacing:"4px",color:C.goldBright,lineHeight:1,position:"relative",zIndex:1}}>{days}</div>
+        <div style={{fontFamily:bar,fontSize:TS.label,letterSpacing:"4px",color:"rgba(255,255,255,0.7)",textTransform:"uppercase",marginTop:"4px",position:"relative",zIndex:1}}>Days Post-Op</div>
+        <div style={{fontFamily:bar,fontSize:TS.label,letterSpacing:"2px",color:"rgba(255,255,255,0.9)",textTransform:"uppercase",marginTop:"10px",position:"relative",zIndex:1}}>{phase.icon} {phase.name} · {weeks}w {xd}d</div>
+        <div style={{height:"4px",background:"rgba(255,255,255,0.15)",borderRadius:"2px",marginTop:"16px",overflow:"hidden",position:"relative",zIndex:1}}>
+          <div style={{width:`${pct}%`,height:"100%",background:`linear-gradient(90deg,${C.goldMid},${C.goldBright})`}}/>
         </div>
-        <div style={{ display:"flex", justifyContent:"space-between", fontFamily:bar, fontSize:"9px", color:C.steel, marginTop:"4px", letterSpacing:"1px", position:"relative", zIndex:1 }}>
-          <span>Day 0</span><span style={{ color:C.goldBright }}>{Math.round(pct)}%</span><span>Day 365</span>
+        <div style={{display:"flex",justifyContent:"space-between",fontFamily:bar,fontSize:TS.labelSm,color:"rgba(255,255,255,0.5)",marginTop:"6px",position:"relative",zIndex:1}}>
+          <span>Day 0</span><span style={{color:C.goldBright}}>{Math.round(pct)}%</span><span>Day 365</span>
         </div>
       </div>
 
-      {/* Readiness score */}
+      {/* Readiness */}
       {readiness && (
-        <Card border={`${readiness.color}60`}>
-          <div style={{ display:"flex", justifyContent:"space-between", alignItems:"flex-start", marginBottom:"10px" }}>
+        <Card border={`${readiness.color}40`} bg={readiness.pale}>
+          <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:"12px"}}>
             <div>
-              <Lbl color={readiness.color} mb={4}>Recovery Readiness</Lbl>
-              <div style={{ fontFamily:bb, fontSize:"42px", letterSpacing:"2px", color:readiness.color, lineHeight:1 }}>{readiness.total}</div>
-              <div style={{ fontFamily:bar, fontSize:"11px", letterSpacing:"2px", color:readiness.color, textTransform:"uppercase", marginTop:"4px" }}>{readiness.label}</div>
+              <Lbl color={readiness.color} mb={6}>Recovery Readiness</Lbl>
+              <div style={{fontFamily:bb,fontSize:"56px",letterSpacing:"2px",color:readiness.color,lineHeight:1}}>{readiness.total}</div>
+              <Badge color={readiness.color} bg={`${readiness.color}18`}>{readiness.label}</Badge>
             </div>
-            <div style={{ textAlign:"right" }}>
-              {[{l:"Pain",v:readiness.painScore,max:40},{l:"Swelling",v:readiness.swellScore,max:20},{l:"Goals",v:readiness.goalScore,max:20},{l:"Mood",v:readiness.moodScore,max:20}].map(r => (
-                <div key={r.l} style={{ display:"flex", alignItems:"center", gap:"6px", marginBottom:"4px", justifyContent:"flex-end" }}>
-                  <span style={{ fontFamily:bar, fontSize:"9px", letterSpacing:"1px", color:C.ash, textTransform:"uppercase" }}>{r.l}</span>
-                  <div style={{ width:"50px", height:"4px", background:C.iron, borderRadius:"2px", overflow:"hidden" }}>
-                    <div style={{ width:`${(r.v/r.max)*100}%`, height:"100%", background:readiness.color }}/>
+            <div style={{paddingTop:"4px"}}>
+              {[{l:"Pain",v:readiness.painScore,max:40},{l:"Swelling",v:readiness.swellScore,max:20},{l:"Goals",v:readiness.goalScore,max:20},{l:"Mood",v:readiness.moodScore,max:20}].map(r=>(
+                <div key={r.l} style={{display:"flex",alignItems:"center",gap:"8px",marginBottom:"6px",justifyContent:"flex-end"}}>
+                  <span style={{fontFamily:bar,fontSize:TS.labelSm,color:C.textSecondary,textTransform:"uppercase"}}>{r.l}</span>
+                  <div style={{width:"54px",height:"5px",background:C.border,borderRadius:"3px",overflow:"hidden"}}>
+                    <div style={{width:`${(r.v/r.max)*100}%`,height:"100%",background:readiness.color}}/>
                   </div>
-                  <span style={{ fontFamily:bar, fontSize:"9px", color:readiness.color, width:"22px", textAlign:"right" }}>{r.v}</span>
+                  <span style={{fontFamily:bar,fontSize:TS.labelSm,color:readiness.color,width:"24px",textAlign:"right"}}>{r.v}</span>
                 </div>
               ))}
             </div>
           </div>
-          <div style={{ fontFamily:cor, fontSize:"13px", fontStyle:"italic", color:C.bone, lineHeight:"1.6", borderLeft:`3px solid ${readiness.color}`, paddingLeft:"12px" }}>{readiness.advice}</div>
-          {recent7.length < 3 && <div style={{ fontFamily:bar, fontSize:"9px", letterSpacing:"1px", color:C.steel, marginTop:"8px", textTransform:"uppercase" }}>Log 3+ check-ins for a full score</div>}
+          <div style={{fontFamily:cor,fontSize:TS.bodySm,fontStyle:"italic",color:C.textPrimary,lineHeight:"1.7",borderLeft:`3px solid ${readiness.color}`,paddingLeft:"14px"}}>{readiness.advice}</div>
+          {recent7.length<3 && <div style={{fontFamily:bar,fontSize:TS.labelSm,color:C.textMuted,marginTop:"10px",textTransform:"uppercase"}}>Log 3+ check-ins for a full score</div>}
         </Card>
       )}
 
       {/* Check-in */}
       {!todayCI ? (
-        <Card border={`${C.goldMid}60`} bg={`${C.blue}20`}>
-          <Lbl>How Are You Doing Today?</Lbl>
-          <div style={{ marginBottom:"16px" }}>
-            <div style={{ fontFamily:bar, fontSize:"11px", letterSpacing:"2px", color:C.ash, textTransform:"uppercase", marginBottom:"10px" }}>Pain Level · {pain}/10</div>
-            <input type="range" min="1" max="10" value={pain} onChange={e => setPain(Number(e.target.value))} style={{ width:"100%", accentColor:pain>=7?C.redLight:pain>=4?C.warnLight:C.greenLight, height:"6px", cursor:"pointer" }}/>
-            <div style={{ display:"flex", justifyContent:"space-between", fontFamily:bar, fontSize:"9px", color:C.ash, marginTop:"4px" }}><span>1 · None</span><span>5 · Moderate</span><span>10 · Severe</span></div>
+        <Card>
+          <SectionHeader title="How Are You Doing Today?" accent={phase.accent}/>
+          <div style={{marginBottom:"18px"}}>
+            <div style={{fontFamily:bar,fontSize:TS.label,color:C.textSecondary,textTransform:"uppercase",marginBottom:"12px",fontWeight:900}}>Pain Level · <span style={{color:pain>=7?C.redLight:pain>=4?C.orangeLight:C.greenLight,fontSize:TS.heading,fontFamily:bb}}>{pain}</span>/10</div>
+            <div style={{position:"relative",padding:"12px 0"}}>
+              <div style={{position:"absolute",top:"50%",left:0,right:0,height:"20px",borderRadius:"10px",background:`linear-gradient(90deg,${C.greenLight} 0%,${C.orangeLight} 50%,${C.redLight} 100%)`,transform:"translateY(-50%)",opacity:0.3,pointerEvents:"none"}}/>
+              <input type="range" min="1" max="10" step="0.5" value={pain} onChange={e=>setPain(Number(e.target.value))}
+                style={{width:"100%",accentColor:pain>=7?C.redLight:pain>=4?C.orangeLight:C.greenLight,height:"20px",cursor:"pointer",position:"relative",zIndex:1}}
+              />
+            </div>
+            <div style={{display:"flex",justifyContent:"space-between",fontFamily:bar,fontSize:TS.labelSm,color:C.textMuted,marginTop:"4px",fontWeight:700}}>
+              <span style={{color:C.greenLight}}>None</span><span>Moderate</span><span style={{color:C.redLight}}>Severe</span>
+            </div>
           </div>
-          <div style={{ marginBottom:"16px" }}>
-            <div style={{ fontFamily:bar, fontSize:"11px", letterSpacing:"2px", color:C.ash, textTransform:"uppercase", marginBottom:"8px" }}>Swelling</div>
-            <div style={{ display:"flex", gap:"8px" }}>
-              {swOpts.map(o => (
-                <div key={o.v} onClick={() => setSwelling(o.v)} style={{ flex:1, textAlign:"center", padding:"10px 4px", borderRadius:"3px", border:`1px solid ${swelling===o.v?C.goldMid:C.iron}`, background:swelling===o.v?`${C.goldDeep}30`:C.char, cursor:"pointer" }}>
-                  <div style={{ fontSize:"18px" }}>{o.icon}</div>
-                  <div style={{ fontFamily:bar, fontSize:"9px", letterSpacing:"1px", color:swelling===o.v?C.goldBright:C.ash, marginTop:"4px", textTransform:"uppercase" }}>{o.label}</div>
+          <div style={{marginBottom:"18px"}}>
+            <div style={{fontFamily:bar,fontSize:TS.label,color:C.textSecondary,textTransform:"uppercase",marginBottom:"10px"}}>Swelling</div>
+            <div style={{display:"flex",gap:"8px"}}>
+              {swOpts.map(o=>(
+                <div key={o.v} onClick={()=>setSwelling(o.v)} style={{flex:1,textAlign:"center",padding:"12px 4px",borderRadius:"10px",border:`1.5px solid ${swelling===o.v?phase.accent:C.border}`,background:swelling===o.v?phase.pale:C.offwhite,cursor:"pointer",transition:"all 0.15s"}}>
+                  <div style={{fontSize:"22px"}}>{o.icon}</div>
+                  <div style={{fontFamily:bar,fontSize:TS.labelSm,color:swelling===o.v?phase.color:C.textSecondary,marginTop:"6px",textTransform:"uppercase",fontWeight:swelling===o.v?700:400}}>{o.label}</div>
                 </div>
               ))}
             </div>
           </div>
-          <div style={{ marginBottom:"16px" }}>
-            <div style={{ fontFamily:bar, fontSize:"11px", letterSpacing:"2px", color:C.ash, textTransform:"uppercase", marginBottom:"8px" }}>Mood</div>
-            <div style={{ display:"flex", gap:"8px" }}>
-              {moods.map(m => (
-                <div key={m.v} onClick={() => setMood(m.v)} style={{ flex:1, textAlign:"center", padding:"10px 4px", borderRadius:"3px", border:`1px solid ${mood===m.v?C.goldMid:C.iron}`, background:mood===m.v?`${C.goldDeep}30`:C.char, cursor:"pointer" }}>
-                  <div style={{ fontSize:"20px" }}>{m.icon}</div>
-                  <div style={{ fontFamily:bar, fontSize:"9px", letterSpacing:"1px", color:mood===m.v?C.goldBright:C.ash, marginTop:"4px", textTransform:"uppercase" }}>{m.label}</div>
+          <div style={{marginBottom:"18px"}}>
+            <div style={{fontFamily:bar,fontSize:TS.label,color:C.textSecondary,textTransform:"uppercase",marginBottom:"10px"}}>Mood</div>
+            <div style={{display:"flex",gap:"8px"}}>
+              {moods.map(m=>(
+                <div key={m.v} onClick={()=>setMood(m.v)} style={{flex:1,textAlign:"center",padding:"12px 4px",borderRadius:"10px",border:`1.5px solid ${mood===m.v?phase.accent:C.border}`,background:mood===m.v?phase.pale:C.offwhite,cursor:"pointer",transition:"all 0.15s"}}>
+                  <div style={{fontSize:"24px"}}>{m.icon}</div>
+                  <div style={{fontFamily:bar,fontSize:TS.labelSm,color:mood===m.v?phase.color:C.textSecondary,marginTop:"6px",textTransform:"uppercase",fontWeight:mood===m.v?700:400}}>{m.label}</div>
                 </div>
               ))}
             </div>
           </div>
-          <Btn onClick={() => { if(mood) onCheckin({ date:today, pain, swelling, mood, day:days }); }} full bg={mood?C.goldBright:C.steel} color={C.black} style={{ opacity:mood?1:0.5 }}>Log Today</Btn>
+          <Btn onClick={()=>{if(mood)onCheckin({date:today,pain,swelling,mood,day:days});}} full bg={mood?phase.color:"#c0c8d8"} style={{opacity:mood?1:0.7}}>Log Today</Btn>
         </Card>
       ) : (
-        <Card border={`${C.greenLight}50`} bg={`${C.green}15`}>
-          <div style={{ display:"flex", gap:"12px", alignItems:"flex-start" }}>
-            <div style={{ fontSize:"28px" }}>✅</div>
-            <div style={{ flex:1 }}>
-              <div style={{ fontFamily:bb, fontSize:"18px", letterSpacing:"2px", color:C.greenLight }}>Day {days} Logged</div>
-              <div style={{ fontFamily:bar, fontSize:"10px", letterSpacing:"2px", color:C.ash, marginTop:"2px", textTransform:"uppercase" }}>Pain {todayCI.pain}/10 · Swelling {todayCI.swelling} · {todayCI.mood}</div>
-              {resp && <div style={{ fontFamily:cor, fontSize:"14px", fontStyle:"italic", color:resp.color, marginTop:"10px", lineHeight:"1.6", borderLeft:`3px solid ${resp.color}`, paddingLeft:"12px" }}>{resp.msg}</div>}
+        <Card border={`${C.greenLight}50`} bg={C.greenPale}>
+          <div style={{display:"flex",gap:"14px",alignItems:"flex-start"}}>
+            <div style={{fontSize:"32px"}}>✅</div>
+            <div style={{flex:1}}>
+              <div style={{fontFamily:bb,fontSize:TS.heading,letterSpacing:"2px",color:C.green}}>Day {days} Logged</div>
+              <div style={{fontFamily:bar,fontSize:TS.label,color:C.textSecondary,marginTop:"4px",textTransform:"uppercase"}}>Pain {todayCI.pain}/10 · Swelling {todayCI.swelling} · {todayCI.mood}</div>
+              {resp&&<div style={{fontFamily:cor,fontSize:TS.bodySm,fontStyle:"italic",color:resp.color,marginTop:"12px",lineHeight:"1.7",background:resp.bg,borderLeft:`3px solid ${resp.color}`,paddingLeft:"14px",paddingTop:"8px",paddingBottom:"8px",paddingRight:"10px",borderRadius:"0 8px 8px 0"}}>{resp.msg}</div>}
             </div>
           </div>
         </Card>
       )}
 
       {/* Quote */}
-      <Card border={`${C.goldDeep}80`} bg={`${C.blue}15`}>
-        <div style={{ fontFamily:cor, fontSize:"17px", fontStyle:"italic", color:C.white, lineHeight:"1.7", marginBottom:"10px" }}>"{quote?.text}"</div>
-        <div style={{ fontFamily:bar, fontSize:"9px", letterSpacing:"2px", color:C.goldMid, textTransform:"uppercase" }}>— APEXRX · Day {days}</div>
-      </Card>
+      <div style={{background:`linear-gradient(135deg,${C.navyDeep},${C.navyMid})`,borderRadius:"12px",padding:"22px 24px",marginBottom:"12px",boxShadow:"0 2px 12px rgba(13,30,61,0.15)"}}>
+        <div style={{fontFamily:cor,fontSize:24,fontWeight:600,color:"rgba(255,255,255,0.97)",lineHeight:"1.7",marginBottom:"14px"}}>"{quote?.text}"</div>
+        <div style={{fontFamily:bar,fontSize:TS.labelSm,letterSpacing:"2px",color:C.goldBright,textTransform:"uppercase",fontWeight:700}}>— APEXRX · Day {days}</div>
+      </div>
 
-      {/* Recent wins */}
-      {recentWins.length > 0 && (
+      {/* Wins */}
+      {recentWins.length>0&&(
         <Card>
-          <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:"10px" }}>
+          <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:"12px"}}>
             <Lbl mb={0}>Recent Wins</Lbl>
-            <Ghost onClick={() => onNav("wins")} color={C.goldMid}>All Wins →</Ghost>
+            <Ghost onClick={()=>onNav("wins")}>All Wins →</Ghost>
           </div>
-          {recentWins.map((w,i) => (
-            <div key={i} style={{ display:"flex", gap:"10px", padding:"8px 0", borderBottom:i<recentWins.length-1?`1px solid ${C.iron}`:"none", alignItems:"flex-start" }}>
-              <span style={{ color:C.goldBright, fontSize:"14px", flexShrink:0 }}>🏆</span>
+          {recentWins.map((w,i)=>(
+            <div key={i} style={{display:"flex",gap:"12px",padding:"10px 0",borderBottom:i<recentWins.length-1?`1px solid ${C.border}`:"none",alignItems:"flex-start"}}>
+              <span style={{fontSize:"18px",flexShrink:0}}>🏆</span>
               <div>
-                <div style={{ fontFamily:cor, fontSize:"14px", color:C.bone, lineHeight:"1.4" }}>{w.text}</div>
-                <div style={{ fontFamily:bar, fontSize:"9px", letterSpacing:"1px", color:C.steel, marginTop:"3px" }}>Day {w.day}</div>
+                <div style={{fontFamily:cor,fontSize:TS.bodySm,color:C.textPrimary,lineHeight:"1.5"}}>{w.text}</div>
+                <div style={{fontFamily:bar,fontSize:TS.labelSm,color:C.textMuted,marginTop:"4px"}}>Day {w.day}</div>
               </div>
             </div>
           ))}
@@ -457,31 +481,32 @@ function HomeScreen({ days, phase, checkins, wins, checked, onCheckin, onNav }) 
       )}
 
       {/* Quick nav */}
-      <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:"8px" }}>
+      <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"10px"}}>
         {[
-          { icon:"✈️", label:"Travel Check",    screen:"travel",    color:C.blueLight },
-          { icon:"💊", label:"Medications",     screen:"meds",      color:C.goldBright },
-          { icon:"🤲", label:"PT Protocol",     screen:"pt",        color:C.goldMid },
-          { icon:"❓", label:"Is This Normal?", screen:"normal",    color:C.warnLight },
-        ].map(t => (
-          <div key={t.screen} onClick={() => onNav(t.screen)} style={{ background:C.char, border:`1px solid ${C.iron}`, borderRadius:"3px", padding:"16px", cursor:"pointer", display:"flex", alignItems:"center", gap:"10px" }}>
-            <span style={{ fontSize:"22px" }}>{t.icon}</span>
-            <div style={{ fontFamily:bar, fontSize:"13px", letterSpacing:"1px", color:t.color, textTransform:"uppercase", fontWeight:"700" }}>{t.label}</div>
+          {icon:"✈️",label:"Travel Check",  screen:"travel",  color:C.white, bg:C.blue,    border:C.navyMid},
+          {icon:"💊",label:"Medications",   screen:"meds",    color:C.white, bg:C.teal,    border:C.tealLight},
+          {icon:"🤲",label:"PT Protocol",   screen:"pt",      color:C.white, bg:C.navyMid, border:C.navyLight},
+          {icon:"❓",label:"Is This Normal?",screen:"normal", color:C.white, bg:C.orange,  border:C.orangeLight},
+        ].map(t=>(
+          <div key={t.screen} onClick={()=>onNav(t.screen)} style={{background:t.bg,border:`1px solid ${t.border}`,borderRadius:"12px",padding:"18px 14px",cursor:"pointer",display:"flex",alignItems:"center",gap:"10px",boxShadow:"0 2px 8px rgba(13,30,61,0.15)"}}>
+            <span style={{fontSize:"28px",flexShrink:0}}>{t.icon}</span>
+            <div style={{fontFamily:bb,fontSize:"22px",letterSpacing:"1px",color:t.color,textTransform:"uppercase",lineHeight:1.1}}>{t.label}</div>
           </div>
         ))}
       </div>
 
-      {/* Caregiver update */}
-      <div onClick={() => onNav("caregiver")} style={{ background:C.char, border:`1px solid ${C.iron}`, borderRadius:"3px", padding:"16px", cursor:"pointer", display:"flex", alignItems:"center", justifyContent:"space-between", marginTop:"0" }}>
-        <div style={{ display:"flex", alignItems:"center", gap:"10px" }}>
-          <span style={{ fontSize:"22px" }}>💬</span>
+      {/* Caregiver */}
+      <div onClick={()=>onNav("caregiver")} style={{background:`linear-gradient(135deg,${C.goldPale},#fffbea)`,border:`1.5px solid ${C.goldMid}50`,borderRadius:"10px",padding:"18px",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"space-between",marginTop:"10px",boxShadow:"0 1px 4px rgba(13,30,61,0.06)"}}>
+        <div style={{display:"flex",alignItems:"center",gap:"12px"}}>
+          <span style={{fontSize:"30px"}}>💬</span>
           <div>
-            <div style={{ fontFamily:bar, fontSize:"13px", letterSpacing:"1px", color:C.goldMid, textTransform:"uppercase", fontWeight:"700" }}>Send Caregiver Update</div>
-            <div style={{ fontFamily:cor, fontSize:"12px", fontStyle:"italic", color:C.ash, marginTop:"2px" }}>Choose what to include · preview · send via text</div>
+            <div style={{fontFamily:bb,fontSize:"24px",color:C.goldDeep,textTransform:"uppercase",letterSpacing:"1px"}}>Send Caregiver Update</div>
+            <div style={{fontFamily:bar,fontSize:TS.labelSm,color:C.textSecondary,marginTop:"5px",fontWeight:600}}>Choose what to include · preview · send via text</div>
           </div>
         </div>
-        <span style={{ color:C.steel, fontSize:"16px" }}>›</span>
+        <span style={{color:C.textMuted,fontSize:"24px"}}>›</span>
       </div>
+
     </div>
   );
 }
@@ -496,71 +521,71 @@ function RecoveryScreen({ days, checked, onCheck, notes, onSaveNote }) {
   const [noteDraft, setNoteDraft] = useState("");
 
   return (
-    <div style={{ padding:"14px 14px 80px", maxWidth:640, margin:"0 auto" }}>
-      <Lbl mb={12}>Recovery Phases</Lbl>
-      {PHASES.map(p => {
-        const isActive = p.id === phase.id, isPast = days >= p.end, isOpen = open === p.id;
-        const pct = isPast ? 100 : isActive ? Math.round(((days-p.start)/(p.end-p.start))*100) : 0;
-        const done = p.goals.filter((_,i) => checked[`${p.id}-${i}`]).length;
+    <div style={{padding:"16px 16px 90px",maxWidth:640,margin:"0 auto"}}>
+      <SectionHeader title="Recovery Phases" subtitle="Tap a phase to view goals and milestones" accent={phase.accent}/>
+      {PHASES.map(p=>{
+        const isActive=p.id===phase.id, isPast=days>=p.end, isOpen=open===p.id;
+        const pct=isPast?100:isActive?Math.round(((days-p.start)/(p.end-p.start))*100):0;
+        const done=p.goals.filter((_,i)=>checked[`${p.id}-${i}`]).length;
         return (
-          <div key={p.id} style={{ marginBottom:"8px", border:`1px solid ${isActive?C.goldMid:isPast?`${C.gold}40`:C.iron}`, borderRadius:"3px", background:isActive?`${C.blue}20`:C.obs }}>
-            <div onClick={() => setOpen(isOpen?null:p.id)} style={{ padding:"13px 14px", cursor:"pointer", display:"flex", gap:"10px", alignItems:"center", userSelect:"none" }}>
-              <span style={{ fontSize:"20px" }}>{p.icon}</span>
-              <div style={{ flex:1 }}>
-                <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center" }}>
-                  <span style={{ fontFamily:bb, fontSize:"18px", letterSpacing:"2px", color:isActive?C.goldBright:isPast?C.goldMid:C.bone }}>{p.name}</span>
-                  <div style={{ display:"flex", gap:"6px", alignItems:"center" }}>
-                    {isActive && <span style={{ fontFamily:bar, fontSize:"9px", letterSpacing:"2px", background:C.goldBright, color:C.black, padding:"2px 7px", fontWeight:700 }}>NOW</span>}
-                    {isPast && <span style={{ color:C.goldMid, fontSize:"12px" }}>✓</span>}
-                    <span style={{ color:C.steel, fontSize:"11px" }}>{isOpen?"▲":"▼"}</span>
+          <div key={p.id} style={{marginBottom:"10px",border:`1.5px solid ${isActive?p.accent:isPast?`${p.color}40`:C.border}`,borderRadius:"12px",background:isActive?p.pale:C.white,boxShadow:"0 1px 4px rgba(13,30,61,0.06)"}}>
+            <div onClick={()=>setOpen(isOpen?null:p.id)} style={{padding:"16px",cursor:"pointer",display:"flex",gap:"12px",alignItems:"center",userSelect:"none"}}>
+              <div style={{width:"44px",height:"44px",borderRadius:"12px",background:isActive?p.accent:isPast?`${p.color}20`:C.offwhite,display:"flex",alignItems:"center",justifyContent:"center",fontSize:"22px",flexShrink:0}}>{p.icon}</div>
+              <div style={{flex:1}}>
+                <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+                  <span style={{fontFamily:bb,fontSize:TS.heading,letterSpacing:"1px",color:isActive?p.color:isPast?C.textSecondary:C.textPrimary}}>{p.name}</span>
+                  <div style={{display:"flex",gap:"8px",alignItems:"center"}}>
+                    {isActive&&<Badge color={C.white} bg={p.accent}>NOW</Badge>}
+                    {isPast&&<span style={{color:p.color,fontSize:"16px"}}>✓</span>}
+                    <span style={{color:C.textMuted,fontSize:"13px"}}>{isOpen?"▲":"▼"}</span>
                   </div>
                 </div>
-                <div style={{ display:"flex", gap:"8px", alignItems:"center", marginTop:"5px" }}>
-                  <div style={{ flex:1, height:"2px", background:C.iron, borderRadius:"1px", overflow:"hidden" }}>
-                    <div style={{ width:`${pct}%`, height:"100%", background:isPast?`linear-gradient(90deg,${C.gold},${C.goldBright})`:`linear-gradient(90deg,${C.blue},${C.goldMid})` }}/>
+                <div style={{display:"flex",gap:"10px",alignItems:"center",marginTop:"8px"}}>
+                  <div style={{flex:1,height:"5px",background:C.border,borderRadius:"3px",overflow:"hidden"}}>
+                    <div style={{width:`${pct}%`,height:"100%",background:isPast?`linear-gradient(90deg,${p.color},${p.accent})`:`linear-gradient(90deg,${p.color}80,${p.accent})`}}/>
                   </div>
-                  <span style={{ fontFamily:bar, fontSize:"9px", letterSpacing:"1px", color:C.ash, whiteSpace:"nowrap" }}>{done}/{p.goals.length} · {p.weeks}</span>
+                  <span style={{fontFamily:bar,fontSize:TS.labelSm,color:C.textSecondary,whiteSpace:"nowrap"}}>{done}/{p.goals.length} · {p.weeks}</span>
                 </div>
               </div>
             </div>
-            {isOpen && (
-              <div style={{ padding:"0 14px 14px", borderTop:`1px solid ${C.iron}` }}>
-                <div style={{ paddingTop:"12px" }}>
-                  <Lbl>Goals</Lbl>
-                  {p.goals.map((g,i) => {
-                    const k = `${p.id}-${i}`, done = checked[k];
+            {isOpen&&(
+              <div style={{padding:"0 16px 16px",borderTop:`1px solid ${C.border}`}}>
+                <div style={{paddingTop:"14px"}}>
+                  <Lbl color={p.color}>Goals</Lbl>
+                  {p.goals.map((g,i)=>{
+                    const k=`${p.id}-${i}`, done=checked[k];
                     return (
-                      <div key={i} onClick={() => onCheck(p.id,i)} style={{ display:"flex", gap:"10px", padding:"9px 10px", marginBottom:"3px", borderRadius:"3px", cursor:"pointer", userSelect:"none", background:done?`${C.goldDeep}20`:C.char, border:`1px solid ${done?`${C.goldMid}50`:"transparent"}` }}>
-                        <div style={{ width:"15px", height:"15px", borderRadius:"2px", border:`1.5px solid ${done?C.goldBright:C.steel}`, background:done?C.goldBright:"transparent", display:"flex", alignItems:"center", justifyContent:"center", fontSize:"10px", color:C.black, flexShrink:0, marginTop:"2px" }}>{done&&"✓"}</div>
-                        <span style={{ fontSize:"15px", color:done?C.goldPale:C.bone, lineHeight:"1.4", textDecoration:done?"line-through":"none", fontFamily:cor }}>{g}</span>
+                      <div key={i} onClick={()=>onCheck(p.id,i)} style={{display:"flex",gap:"12px",padding:"12px",marginBottom:"6px",borderRadius:"8px",cursor:"pointer",userSelect:"none",background:done?p.pale:C.offwhite,border:`1px solid ${done?p.accent:C.border}`}}>
+                        <div style={{width:"22px",height:"22px",borderRadius:"6px",border:`2px solid ${done?p.accent:C.borderMid}`,background:done?p.accent:C.white,display:"flex",alignItems:"center",justifyContent:"center",fontSize:"11px",color:C.white,flexShrink:0,marginTop:"1px"}}>{done&&"✓"}</div>
+                        <span style={{fontSize:TS.body,color:done?p.color:C.textPrimary,lineHeight:"1.5",textDecoration:done?"line-through":"none",fontFamily:cor}}>{g}</span>
                       </div>
                     );
                   })}
-                  <div style={{ marginTop:"14px" }}>
-                    <Lbl>Milestones</Lbl>
-                    {p.milestones.map((m,i) => (
-                      <div key={i} style={{ display:"flex", gap:"8px", padding:"6px 0", borderBottom:i<p.milestones.length-1?`1px solid ${C.iron}`:"none" }}>
-                        <span style={{ color:C.goldMid, fontSize:"10px" }}>◆</span>
-                        <span style={{ fontFamily:cor, fontSize:"13px", fontStyle:"italic", color:C.ash }}>{m}</span>
+                  <div style={{marginTop:"14px"}}>
+                    <Lbl color={p.color}>Milestones</Lbl>
+                    {p.milestones.map((m,i)=>(
+                      <div key={i} style={{display:"flex",gap:"10px",padding:"10px 0",borderBottom:i<p.milestones.length-1?`1px solid ${C.border}`:"none"}}>
+                        <span style={{color:p.accent,fontSize:"16px",marginTop:"3px",flexShrink:0}}>◆</span>
+                        <span style={{fontFamily:bar,fontSize:TS.body,color:C.textPrimary,lineHeight:"1.5",fontWeight:600}}>{m}</span>
                       </div>
                     ))}
                   </div>
-                  <div style={{ marginTop:"14px", display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:"8px" }}>
-                    <Lbl mb={0}>Notes</Lbl>
-                    <Ghost onClick={() => { setEditNote(p.id); setNoteDraft(notes[p.id]||""); }} color={C.goldMid}>{notes[p.id]?"Edit":"+ Add"}</Ghost>
+                  <div style={{marginTop:"14px",display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:"10px"}}>
+                    <Lbl mb={0} color={p.color}>Notes</Lbl>
+                    <Ghost onClick={()=>{setEditNote(p.id);setNoteDraft(notes[p.id]||"");}} color={p.color}>{notes[p.id]?"Edit":"+ Add"}</Ghost>
                   </div>
-                  {editNote===p.id ? (
+                  {editNote===p.id?(
                     <div>
-                      <TA value={noteDraft} onChange={e => setNoteDraft(e.target.value)} placeholder="PT feedback, ROM measurements, pain notes..."/>
-                      <div style={{ display:"flex", gap:"8px", marginTop:"8px" }}>
-                        <Btn onClick={() => { onSaveNote(p.id,noteDraft); setEditNote(null); }}>Save</Btn>
-                        <Ghost onClick={() => setEditNote(null)}>Cancel</Ghost>
+                      <TA value={noteDraft} onChange={e=>setNoteDraft(e.target.value)} placeholder="PT feedback, ROM measurements, pain notes..."/>
+                      <div style={{display:"flex",gap:"10px",marginTop:"10px"}}>
+                        <Btn onClick={()=>{onSaveNote(p.id,noteDraft);setEditNote(null);}} bg={p.color}>Save</Btn>
+                        <Ghost onClick={()=>setEditNote(null)}>Cancel</Ghost>
                       </div>
                     </div>
-                  ) : notes[p.id] ? (
-                    <div style={{ background:C.char, border:`1px solid ${C.iron}`, borderRadius:"3px", padding:"10px", fontFamily:cor, fontSize:"14px", fontStyle:"italic", color:C.ash, lineHeight:"1.6", whiteSpace:"pre-wrap" }}>{notes[p.id]}</div>
-                  ) : (
-                    <div style={{ fontFamily:cor, fontSize:"13px", fontStyle:"italic", color:C.steel }}>No notes yet.</div>
+                  ):notes[p.id]?(
+                    <div style={{background:p.pale,border:`1px solid ${p.accent}40`,borderRadius:"8px",padding:"14px",fontFamily:cor,fontSize:TS.bodySm,fontStyle:"italic",color:C.textPrimary,lineHeight:"1.7",whiteSpace:"pre-wrap"}}>{notes[p.id]}</div>
+                  ):(
+                    <div style={{fontFamily:cor,fontSize:TS.bodySm,fontStyle:"italic",color:C.textMuted}}>No notes yet.</div>
                   )}
                 </div>
               </div>
@@ -576,100 +601,91 @@ function RecoveryScreen({ days, checked, onCheck, notes, onSaveNote }) {
 // MEDS
 // ══════════════════════════════════════════════════════════════════════════════
 function MedsScreen() {
-  const [meds, setMeds] = useState(() => load("ax_meds_v2", []));
-  const [timers, setTimers] = useState(() => load("ax_timers_v2", {}));
-  const [now, setNow] = useState(Date.now());
-  const [nm, setNm] = useState(""); const [ni, setNi] = useState(4); const [nu, setNu] = useState("hours");
-  const [sleep, setSleep] = useState(() => load("ax_sleep_v2", { elevation:false, brace:false, wakeups:0 }));
-  const [sleepDate, setSleepDate] = useState(() => loadRaw("ax_sleep_date_v2",""));
-  useEffect(() => { const id = setInterval(() => setNow(Date.now()), 1000); return () => clearInterval(id); }, []);
-  const addMed = () => {
-    if (!nm.trim()) return;
-    const is = ni * (nu==="hours"?3600:60);
-    const m = { id:Date.now(), name:nm.trim(), intervalSec:is, unit:nu, interval:ni };
-    const u = [...meds, m]; setMeds(u); save("ax_meds_v2",u); setNm(""); setNi(4); setNu("hours");
-  };
-  const delMed = (id) => { const u = meds.filter(m=>m.id!==id); setMeds(u); save("ax_meds_v2",u); const t={...timers}; delete t[id]; setTimers(t); save("ax_timers_v2",t); };
-  const takeMed = (m) => { const ta=Date.now(); const u={...timers,[m.id]:{takenAt:ta,nextAt:ta+m.intervalSec*1000}}; setTimers(u); save("ax_timers_v2",u); };
-  const today = new Date().toDateString();
-  const saveSleep = () => { save("ax_sleep_v2",sleep); saveRaw("ax_sleep_date_v2",today); setSleepDate(today); };
-
+  const [meds,setMeds]=useState(()=>load("ax_meds_v2",[]));
+  const [timers,setTimers]=useState(()=>load("ax_timers_v2",{}));
+  const [now,setNow]=useState(Date.now());
+  const [nm,setNm]=useState(""); const [ni,setNi]=useState(4); const [nu,setNu]=useState("hours");
+  const [sleep,setSleep]=useState(()=>load("ax_sleep_v2",{elevation:false,brace:false,wakeups:0}));
+  const [sleepDate,setSleepDate]=useState(()=>loadRaw("ax_sleep_date_v2",""));
+  useEffect(()=>{const id=setInterval(()=>setNow(Date.now()),1000);return()=>clearInterval(id);},[]);
+  const addMed=()=>{if(!nm.trim())return;const is=ni*(nu==="hours"?3600:60);const m={id:Date.now(),name:nm.trim(),intervalSec:is,unit:nu,interval:ni};const u=[...meds,m];setMeds(u);save("ax_meds_v2",u);setNm("");setNi(4);setNu("hours");};
+  const delMed=(id)=>{const u=meds.filter(m=>m.id!==id);setMeds(u);save("ax_meds_v2",u);const t={...timers};delete t[id];setTimers(t);save("ax_timers_v2",t);};
+  const takeMed=(m)=>{const ta=Date.now();const u={...timers,[m.id]:{takenAt:ta,nextAt:ta+m.intervalSec*1000}};setTimers(u);save("ax_timers_v2",u);};
+  const today=new Date().toDateString();
+  const saveSleep=()=>{save("ax_sleep_v2",sleep);saveRaw("ax_sleep_date_v2",today);setSleepDate(today);};
   return (
-    <div style={{ padding:"14px 14px 80px", maxWidth:640, margin:"0 auto" }}>
-      {meds.length > 0 && (
-        <div>
-          <Lbl mb={10}>Active Medications</Lbl>
-          {meds.map(m => {
-            const t = timers[m.id], ta=t?.takenAt, na=t?.nextAt;
-            const rem = na ? Math.max(0,Math.round((na-now)/1000)) : null;
-            const elapsed = ta ? Math.round((now-ta)/1000) : null;
-            const pct = ta&&na ? Math.min(100,((now-ta)/(na-ta))*100) : 0;
-            const overdue = rem===0&&!!ta, warn=!overdue&&rem!==null&&rem<1800;
-            const bc = overdue?C.redLight:warn?C.warnLight:C.greenLight;
-            return (
-              <Card key={m.id} border={overdue?`${C.redLight}60`:warn?`${C.warnLight}40`:C.iron} bg={overdue?`${C.red}20`:C.obs}>
-                <div style={{ display:"flex", justifyContent:"space-between", alignItems:"flex-start" }}>
-                  <div>
-                    <div style={{ fontFamily:bb, fontSize:"22px", letterSpacing:"2px", color:C.white }}>💊 {m.name}</div>
-                    <div style={{ fontFamily:bar, fontSize:"10px", letterSpacing:"2px", color:C.ash, textTransform:"uppercase" }}>Every {m.interval} {m.unit}</div>
-                  </div>
-                  <button onClick={() => delMed(m.id)} style={{ background:"transparent", border:"none", color:C.steel, cursor:"pointer", fontSize:"20px" }}>×</button>
+    <div style={{padding:"16px 16px 90px",maxWidth:640,margin:"0 auto"}}>
+      <SectionHeader title="Medications" subtitle="Track doses and set reminders" accent={C.teal}/>
+      {meds.length>0&&meds.map(m=>{
+        const t=timers[m.id],ta=t?.takenAt,na=t?.nextAt;
+        const rem=na?Math.max(0,Math.round((na-now)/1000)):null;
+        const elapsed=ta?Math.round((now-ta)/1000):null;
+        const pct=ta&&na?Math.min(100,((now-ta)/(na-ta))*100):0;
+        const overdue=rem===0&&!!ta,warn=!overdue&&rem!==null&&rem<1800;
+        const bc=overdue?C.redLight:warn?C.orangeLight:C.greenLight;
+        const bg=overdue?C.redPale:warn?C.orangePale:C.white;
+        return (
+          <Card key={m.id} border={overdue?C.redLight:warn?C.orangeLight:C.border} bg={bg}>
+            <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start"}}>
+              <div>
+                <div style={{fontFamily:bb,fontSize:TS.heading,letterSpacing:"1px",color:C.navy}}>💊 {m.name}</div>
+                <div style={{fontFamily:bar,fontSize:TS.label,color:C.textSecondary,textTransform:"uppercase",marginTop:"4px"}}>Every {m.interval} {m.unit}</div>
+              </div>
+              <button onClick={()=>delMed(m.id)} style={{background:"transparent",border:"none",color:C.textMuted,cursor:"pointer",fontSize:"22px"}}>×</button>
+            </div>
+            {ta&&(
+              <div style={{marginTop:"16px"}}>
+                <div style={{display:"flex",justifyContent:"space-between",fontFamily:bar,fontSize:TS.label,color:C.textSecondary,textTransform:"uppercase",marginBottom:"8px"}}>
+                  <span>Taken {new Date(ta).toLocaleTimeString([],{hour:"2-digit",minute:"2-digit"})}</span>
+                  <span style={{color:overdue?C.redLight:bc,fontWeight:700}}>{overdue?"⚠️ DUE NOW":`Next ${fmtTime(rem)}`}</span>
                 </div>
-                {ta && (
-                  <div style={{ marginTop:"14px" }}>
-                    <div style={{ display:"flex", justifyContent:"space-between", fontFamily:bar, fontSize:"10px", letterSpacing:"1px", color:C.ash, textTransform:"uppercase", marginBottom:"6px" }}>
-                      <span>Taken {new Date(ta).toLocaleTimeString([],{hour:"2-digit",minute:"2-digit"})}</span>
-                      <span style={{ color:overdue?C.redLight:bc, fontWeight:overdue?"bold":"normal" }}>{overdue?"⚠️ DUE NOW":`Next ${fmtTime(rem)}`}</span>
-                    </div>
-                    <div style={{ height:"8px", background:C.iron, borderRadius:"2px", overflow:"hidden" }}>
-                      <div style={{ width:`${pct}%`, height:"100%", background:`linear-gradient(90deg,${C.greenLight},${bc})`, transition:"width 1s linear" }}/>
-                    </div>
-                    <div style={{ fontFamily:bar, fontSize:"9px", letterSpacing:"1px", color:C.steel, marginTop:"4px", textTransform:"uppercase" }}>{fmtTime(elapsed)} elapsed of {fmtTime(m.intervalSec)}</div>
-                  </div>
-                )}
-                <Btn onClick={() => takeMed(m)} full bg={overdue?C.redLight:C.goldBright} color={C.black} style={{ marginTop:"14px", fontSize:"14px", padding:"15px" }}>
-                  {ta?"✓ Taken — Restart Timer":"Mark as Taken — Start Timer"}
-                </Btn>
-              </Card>
-            );
-          })}
-        </div>
-      )}
+                <div style={{height:"10px",background:C.border,borderRadius:"5px",overflow:"hidden"}}>
+                  <div style={{width:`${pct}%`,height:"100%",background:`linear-gradient(90deg,${C.greenLight},${bc})`,transition:"width 1s linear"}}/>
+                </div>
+                <div style={{fontFamily:bar,fontSize:TS.labelSm,color:C.textMuted,marginTop:"6px",textTransform:"uppercase"}}>{fmtTime(elapsed)} elapsed of {fmtTime(m.intervalSec)}</div>
+              </div>
+            )}
+            <Btn onClick={()=>takeMed(m)} full bg={overdue?C.redLight:C.teal} style={{marginTop:"16px",fontSize:TS.label,padding:"16px"}}>
+              {ta?"✓ Taken — Restart Timer":"Mark as Taken — Start Timer"}
+            </Btn>
+          </Card>
+        );
+      })}
       <Card>
         <Lbl>Add Medication</Lbl>
-        <Inp value={nm} onChange={e=>setNm(e.target.value)} placeholder="Medication name" style={{ marginBottom:"8px" }}/>
-        <div style={{ display:"flex", gap:"8px", marginBottom:"12px" }}>
-          <div style={{ flex:1 }}>
-            <div style={{ fontFamily:bar, fontSize:"9px", letterSpacing:"2px", color:C.ash, textTransform:"uppercase", marginBottom:"5px" }}>Interval</div>
+        <Inp value={nm} onChange={e=>setNm(e.target.value)} placeholder="Medication name" style={{marginBottom:"10px"}}/>
+        <div style={{display:"flex",gap:"10px",marginBottom:"14px"}}>
+          <div style={{flex:1}}>
+            <div style={{fontFamily:bar,fontSize:TS.labelSm,color:C.textSecondary,textTransform:"uppercase",marginBottom:"6px"}}>Interval</div>
             <Inp type="number" value={ni} onChange={e=>setNi(Number(e.target.value))}/>
           </div>
-          <div style={{ flex:1 }}>
-            <div style={{ fontFamily:bar, fontSize:"9px", letterSpacing:"2px", color:C.ash, textTransform:"uppercase", marginBottom:"5px" }}>Unit</div>
-            <select value={nu} onChange={e=>setNu(e.target.value)} style={{ width:"100%", background:C.char, border:`1px solid ${C.iron}`, borderRadius:"3px", padding:"11px 12px", color:C.white, fontSize:"15px", outline:"none" }}>
+          <div style={{flex:1}}>
+            <div style={{fontFamily:bar,fontSize:TS.labelSm,color:C.textSecondary,textTransform:"uppercase",marginBottom:"6px"}}>Unit</div>
+            <select value={nu} onChange={e=>setNu(e.target.value)} style={{width:"100%",background:C.white,border:`1.5px solid ${C.borderMid}`,borderRadius:"8px",padding:"13px 14px",color:C.textPrimary,fontSize:TS.body,outline:"none"}}>
               <option value="hours">Hours</option><option value="minutes">Minutes</option>
             </select>
           </div>
         </div>
-        <Btn onClick={addMed} full>+ Add Medication</Btn>
+        <Btn onClick={addMed} full bg={C.navyMid}>+ Add Medication</Btn>
       </Card>
-      <Card border={`${C.blueLight}40`}>
-        <Lbl color={C.blueLight}>Sleep Log — Last Night</Lbl>
-        {sleepDate===today && <div style={{ fontFamily:bar, fontSize:"9px", letterSpacing:"2px", color:C.greenLight, textTransform:"uppercase", marginBottom:"10px" }}>✓ Logged today</div>}
-        {[{key:"elevation",label:"Slept with elevation",icon:"⬆️"},{key:"brace",label:"Brace on all night",icon:"🦿"}].map(item => (
-          <div key={item.key} onClick={() => setSleep(s=>({...s,[item.key]:!s[item.key]}))} style={{ display:"flex", gap:"10px", padding:"10px", marginBottom:"8px", borderRadius:"3px", border:`1px solid ${sleep[item.key]?`${C.goldMid}60`:C.iron}`, background:sleep[item.key]?`${C.goldDeep}20`:C.char, cursor:"pointer", alignItems:"center", userSelect:"none" }}>
-            <span style={{ fontSize:"20px" }}>{item.icon}</span>
-            <span style={{ fontFamily:cor, fontSize:"15px", color:sleep[item.key]?C.white:C.ash, flex:1 }}>{item.label}</span>
-            <div style={{ width:"22px", height:"22px", borderRadius:"2px", border:`1.5px solid ${sleep[item.key]?C.goldBright:C.steel}`, background:sleep[item.key]?C.goldBright:"transparent", display:"flex", alignItems:"center", justifyContent:"center", fontSize:"11px", color:C.black, flexShrink:0 }}>{sleep[item.key]&&"✓"}</div>
+      <Card border={`${C.blueLight}40`} bg={C.bluePale}>
+        <Lbl color={C.blue}>Sleep Log — Last Night</Lbl>
+        {sleepDate===today&&<div style={{fontFamily:bar,fontSize:TS.labelSm,color:C.greenLight,textTransform:"uppercase",marginBottom:"12px"}}>✓ Logged today</div>}
+        {[{key:"elevation",label:"Slept with elevation",icon:"⬆️"},{key:"brace",label:"Brace on all night",icon:"🦿"}].map(item=>(
+          <div key={item.key} onClick={()=>setSleep(s=>({...s,[item.key]:!s[item.key]}))} style={{display:"flex",gap:"12px",padding:"14px",marginBottom:"10px",borderRadius:"10px",border:`1.5px solid ${sleep[item.key]?C.blueLight:C.border}`,background:sleep[item.key]?C.white:C.offwhite,cursor:"pointer",alignItems:"center",userSelect:"none",boxShadow:sleep[item.key]?"0 1px 4px rgba(41,128,185,0.15)":"none"}}>
+            <span style={{fontSize:"24px"}}>{item.icon}</span>
+            <span style={{fontFamily:cor,fontSize:TS.body,color:C.textPrimary,flex:1}}>{item.label}</span>
+            <div style={{width:"24px",height:"24px",borderRadius:"6px",border:`2px solid ${sleep[item.key]?C.blueLight:C.borderMid}`,background:sleep[item.key]?C.blueLight:C.white,display:"flex",alignItems:"center",justifyContent:"center",fontSize:"12px",color:C.white,flexShrink:0}}>{sleep[item.key]&&"✓"}</div>
           </div>
         ))}
-        <div style={{ marginBottom:"12px" }}>
-          <div style={{ fontFamily:bar, fontSize:"10px", letterSpacing:"2px", color:C.ash, textTransform:"uppercase", marginBottom:"8px" }}>Night Wakeups: {sleep.wakeups}</div>
-          <input type="range" min="0" max="10" value={sleep.wakeups} onChange={e=>setSleep(s=>({...s,wakeups:Number(e.target.value)}))} style={{ width:"100%", accentColor:C.goldBright, height:"6px", cursor:"pointer" }}/>
-          <div style={{ display:"flex", justifyContent:"space-between", fontFamily:bar, fontSize:"9px", color:C.steel, marginTop:"4px" }}><span>0 · Slept through</span><span>10 · Constant</span></div>
+        <div style={{marginBottom:"14px"}}>
+          <div style={{fontFamily:bar,fontSize:TS.label,color:C.textSecondary,textTransform:"uppercase",marginBottom:"10px"}}>Night Wakeups: <span style={{color:C.blue,fontFamily:bb,fontSize:TS.subhead}}>{sleep.wakeups}</span></div>
+          <input type="range" min="0" max="10" value={sleep.wakeups} onChange={e=>setSleep(s=>({...s,wakeups:Number(e.target.value)}))} style={{width:"100%",accentColor:C.blueLight,height:"8px",cursor:"pointer"}}/>
+          <div style={{display:"flex",justifyContent:"space-between",fontFamily:bar,fontSize:TS.labelSm,color:C.textMuted,marginTop:"6px"}}><span>0 · Slept through</span><span>10 · Constant</span></div>
         </div>
-        <Btn onClick={saveSleep} full bg={C.blueLight}>Save Sleep Log</Btn>
+        <Btn onClick={saveSleep} full bg={C.blue}>Save Sleep Log</Btn>
       </Card>
-      <div style={{ fontFamily:cor, fontSize:"12px", fontStyle:"italic", color:C.steel, textAlign:"center", padding:"10px 0 16px", lineHeight:"1.8" }}>Follow your prescriber's instructions. This is a reminder aid only.</div>
+      <div style={{fontFamily:cor,fontSize:TS.caption,fontStyle:"italic",color:C.textMuted,textAlign:"center",padding:"12px 0 18px",lineHeight:"1.9"}}>Follow your prescriber's instructions. This is a reminder aid only.</div>
     </div>
   );
 }
@@ -678,110 +694,89 @@ function MedsScreen() {
 // PT
 // ══════════════════════════════════════════════════════════════════════════════
 function PTScreen({ days, checkins, checked, wins }) {
-  const phase = getPhase(days);
-  const [prepOpen, setPrepOpen] = useState(false);
-  const [debrief, setDebrief] = useState("");
-  const [debriefs, setDebriefs] = useState(() => load("ax_debriefs_v2",[]));
-  const [ptItems, setPtItems] = useState(() => load("ax_ptitems_v2",[]));
-  const [newItem, setNewItem] = useState("");
-  const [nextAppt, setNextAppt] = useState(() => loadRaw("ax_next_appt",""));
-  const [surgeonReport, setSurgeonReport] = useState("");
-  const [loadingReport, setLoadingReport] = useState(false);
+  const phase=getPhase(days);
+  const [prepOpen,setPrepOpen]=useState(false);
+  const [debrief,setDebrief]=useState("");
+  const [debriefs,setDebriefs]=useState(()=>load("ax_debriefs_v2",[]));
+  const [ptItems,setPtItems]=useState(()=>load("ax_ptitems_v2",[]));
+  const [newItem,setNewItem]=useState("");
+  const [nextAppt,setNextAppt]=useState(()=>loadRaw("ax_next_appt",""));
+  const [surgeonReport,setSurgeonReport]=useState("");
+  const [loadingReport,setLoadingReport]=useState(false);
+  const [romLog,setRomLog]=useState(()=>load("ax_rom_v2",[]));
+  const initVals=()=>Object.fromEntries(ROM_CONFIG.sides.map(s=>[s,0]));
+  const [romVals,setRomVals]=useState(initVals);
+  const [romNote,setRomNote]=useState("");
+  const [customProtocols,setCustomProtocols]=useState(()=>load("ax_custom_protocols_v2",{"Therapeutic Exercise":[],"Neuromuscular/Balance":[],"Recovery Adjuncts":[]}));
+  const [newProtocolItem,setNewProtocolItem]=useState({"Therapeutic Exercise":"","Neuromuscular/Balance":"","Recovery Adjuncts":""});
+  const romTarget=ROM_CONFIG.phaseTargets[phase.id]||ROM_CONFIG.phaseTargets[5];
+  const latestRom=romLog.length?romLog[romLog.length-1]:null;
+  const allZero=ROM_CONFIG.sides.every(s=>romVals[s]===0);
 
-  const saveDebrief = () => {
-    if (!debrief.trim()) return;
-    const u = [...debriefs, { id:Date.now(), text:debrief.trim(), day:days, date:new Date().toDateString() }];
-    setDebriefs(u); save("ax_debriefs_v2",u); setDebrief("");
-  };
-  const addItem = () => {
-    if (!newItem.trim()) return;
-    const u = [...ptItems, { id:Date.now(), label:newItem.trim() }];
-    setPtItems(u); save("ax_ptitems_v2",u); setNewItem("");
-  };
-  const saveAppt = (v) => { setNextAppt(v); saveRaw("ax_next_appt",v); };
+  const saveDebrief=()=>{if(!debrief.trim())return;const u=[...debriefs,{id:Date.now(),text:debrief.trim(),day:days,date:new Date().toDateString()}];setDebriefs(u);save("ax_debriefs_v2",u);setDebrief("");};
+  const addItem=()=>{if(!newItem.trim())return;const u=[...ptItems,{id:Date.now(),label:newItem.trim()}];setPtItems(u);save("ax_ptitems_v2",u);setNewItem("");};
+  const saveAppt=(v)=>{setNextAppt(v);saveRaw("ax_next_appt",v);};
+  const saveRom=()=>{const entry={id:Date.now(),day:days,date:new Date().toDateString(),vals:{...romVals},note:romNote.trim()};const u=[...romLog,entry];setRomLog(u);save("ax_rom_v2",u);setRomVals(initVals());setRomNote("");};
+  const delRom=(id)=>{const u=romLog.filter(r=>r.id!==id);setRomLog(u);save("ax_rom_v2",u);};
 
-  let daysUntil = null;
-  if (nextAppt) { const d = new Date(nextAppt+"T12:00:00"); daysUntil = Math.ceil((d-new Date())/86400000); }
+  let daysUntil=null;
+  if(nextAppt){const d=new Date(nextAppt+"T12:00:00");daysUntil=Math.ceil((d-new Date())/86400000);}
 
-  const generateReport = async () => {
-    setLoadingReport(true); setSurgeonReport("");
-    const recent = checkins.slice(-14);
-    const avgPain = recent.length ? Math.round(recent.reduce((a,c)=>a+c.pain,0)/recent.length*10)/10 : "no data";
-    const doneGoals = phase.goals.filter((_,i) => checked[`${phase.id}-${i}`]);
-    const recentWins = wins.slice(-5).map(w=>w.text).join("; ");
-    const prompt = `You are helping a patient prepare a concise surgical follow-up summary for their orthopedic surgeon (Dr. Richard Myers). The patient had bilateral patellar tendon repair surgery on March 16, 2026 using suture-based transosseous repair, three bone tunnels per knee, no metal hardware. Today is Day ${days} post-op, in the ${phase.name} phase.
-
-Recovery data:
-- Average pain (last 14 days): ${avgPain}/10
-- Goals completed this phase: ${doneGoals.join(", ")||"none logged"}
-- Recent wins: ${recentWins||"none logged"}
-
-Write a concise 1-page surgical visit summary. Sections: Progress Summary, Pain & Swelling, Functional Milestones, Current Concerns, Goals for Next Phase. Under 250 words. Clinical but patient-authored tone.`;
-    const text = await callClaude(prompt);
-    setSurgeonReport(text);
-    setLoadingReport(false);
+  const generateReport=async()=>{
+    setLoadingReport(true);setSurgeonReport("");
+    const recent=checkins.slice(-14);
+    const avgPain=recent.length?Math.round(recent.reduce((a,c)=>a+c.pain,0)/recent.length*10)/10:"no data";
+    const doneGoals=phase.goals.filter((_,i)=>checked[`${phase.id}-${i}`]);
+    const winsText=wins.slice(-5).map(w=>w.text).join("; ");
+    const prompt=`You are helping a patient prepare a concise surgical follow-up summary for their orthopedic surgeon (Dr. Richard Myers). The patient had bilateral patellar tendon repair surgery on March 16, 2026 using suture-based transosseous repair, three bone tunnels per knee, no metal hardware. Today is Day ${days} post-op, in the ${phase.name} phase. Average pain (last 14 days): ${avgPain}/10. Goals completed: ${doneGoals.join(", ")||"none logged"}. Recent wins: ${winsText||"none logged"}. Write a concise surgical visit summary under 250 words. Sections: Progress Summary, Pain & Swelling, Functional Milestones, Current Concerns, Goals for Next Phase. Clinical but patient-authored tone.`;
+    const text=await callClaude(prompt);
+    setSurgeonReport(text);setLoadingReport(false);
   };
 
-  // ROM tracker — driven entirely by ROM_CONFIG
-  const [romLog, setRomLog] = useState(() => load("ax_rom_v2", []));
-  const initVals = () => Object.fromEntries(ROM_CONFIG.sides.map(s => [s, 0]));
-  const [romVals, setRomVals] = useState(initVals);
-  const [romNote, setRomNote] = useState("");
-
-  const romTarget = ROM_CONFIG.phaseTargets[phase.id] || ROM_CONFIG.phaseTargets[5];
-  const latestRom = romLog.length ? romLog[romLog.length - 1] : null;
-  const allZero = ROM_CONFIG.sides.every(s => romVals[s] === 0);
-
-  const saveRom = () => {
-    const entry = { id:Date.now(), day:days, date:new Date().toDateString(), vals:{...romVals}, note:romNote.trim() };
-    const u = [...romLog, entry];
-    setRomLog(u); save("ax_rom_v2", u);
-    setRomVals(initVals()); setRomNote("");
-  };
-  const delRom = (id) => { const u = romLog.filter(r => r.id !== id); setRomLog(u); save("ax_rom_v2", u); };
-
-  const protocols = [
-    { cat:"Therapeutic Exercise", icon:"🏋️", items:[{l:"Quad sets (isometric)",d:"10×3/day from Day 1 — foundational activation"},{l:"Straight leg raises",d:"With brace locked; progress to without when no lag"},{l:"Terminal knee extensions",d:"Theraband around post — key for quad re-education"},{l:"Stationary bike",d:"Begin Week 3–4, low resistance, no pain"},{l:"Eccentric decline squats",d:"Begin Week 13+ — gold standard for tendon loading"}] },
-    { cat:"Neuromuscular/Balance", icon:"⚖️", items:[{l:"Single-leg stance",d:"Eyes open → closed → unstable surface"},{l:"Proprioception",d:"BOSU, wobble board — begin Week 8+"},{l:"Gait retraining",d:"Normalize mechanics early"}] },
-    { cat:"Recovery Adjuncts", icon:"💉", items:[{l:"BPC-157",d:"Connective tissue repair — confirm dosing with provider"},{l:"TB-500",d:"Systemic healing peptide — coordinate with BPC-157 cycle"},{l:"Collagen + Vit C",d:"15g collagen + 50mg Vit C, 30–60 min pre-exercise"}] },
+  const protocols=[
+    {cat:"Therapeutic Exercise",icon:"🏋️",items:[{l:"Quad sets (isometric)",d:"10×3/day from Day 1 — foundational activation"},{l:"Straight leg raises",d:"With brace locked; progress to without when no lag"},{l:"Terminal knee extensions",d:"Theraband around post — key for quad re-education"},{l:"Stationary bike",d:"Begin Week 3–4, low resistance, no pain"},{l:"Eccentric decline squats",d:"Begin Week 13+ — gold standard for tendon loading"}]},
+    {cat:"Neuromuscular/Balance",icon:"⚖️",items:[{l:"Single-leg stance",d:"Eyes open → closed → unstable surface"},{l:"Proprioception",d:"BOSU, wobble board — begin Week 8+"},{l:"Gait retraining",d:"Normalize mechanics early"}]},
+    {cat:"Recovery Adjuncts",icon:"💉",items:[{l:"BPC-157",d:"Connective tissue repair — confirm dosing with provider"},{l:"TB-500",d:"Systemic healing peptide — coordinate with BPC-157 cycle"},{l:"Collagen + Vit C",d:"15g collagen + 50mg Vit C, 30–60 min pre-exercise"}]},
   ];
 
   return (
-    <div style={{ padding:"14px 14px 80px", maxWidth:640, margin:"0 auto" }}>
-      <Card border={`${C.goldMid}50`} bg={`${C.blue}15`}>
-        <Lbl>Next Appointment</Lbl>
-        <Inp type="date" value={nextAppt} onChange={e=>saveAppt(e.target.value)} style={{ marginBottom:"8px", colorScheme:"dark" }}/>
-        {daysUntil !== null && (
-          <div style={{ fontFamily:bb, fontSize:"22px", letterSpacing:"2px", color:daysUntil<=3?C.warnLight:C.goldBright }}>
+    <div style={{padding:"16px 16px 90px",maxWidth:640,margin:"0 auto"}}>
+      <SectionHeader title="PT & Recovery" subtitle="Protocols, ROM tracking, and surgeon prep" accent={C.navyMid}/>
+
+      <Card border={`${C.goldMid}50`} bg={C.goldPale}>
+        <Lbl color={C.goldDeep}>Next Appointment</Lbl>
+        <Inp type="date" value={nextAppt} onChange={e=>saveAppt(e.target.value)} style={{marginBottom:"10px",colorScheme:"light"}}/>
+        {daysUntil!==null&&(
+          <div style={{fontFamily:bb,fontSize:TS.display,letterSpacing:"2px",color:daysUntil<=3?C.redLight:C.navy}}>
             {daysUntil<=0?"Today":daysUntil===1?"Tomorrow":`${daysUntil} days away`}
           </div>
         )}
       </Card>
 
-      <Card border={`${C.blueLight}50`} bg={`${C.blue}12`}>
-        <Lbl color={C.blueLight}>🏥 Surgeon Visit Prep</Lbl>
-        <div style={{ fontFamily:cor, fontSize:"14px", fontStyle:"italic", color:C.ash, lineHeight:"1.6", marginBottom:"14px" }}>Generate a summary of your recovery to share with Dr. Myers — built from your actual check-in data.</div>
-        <Btn onClick={generateReport} full bg={C.blueLight} disabled={loadingReport}>{loadingReport?"Generating...":"Generate Visit Summary"}</Btn>
-        {surgeonReport && (
-          <div style={{ marginTop:"14px" }}>
-            <div style={{ background:C.char, border:`1px solid ${C.iron}`, borderRadius:"3px", padding:"14px", fontFamily:cor, fontSize:"14px", color:C.bone, lineHeight:"1.8", whiteSpace:"pre-wrap" }}>{surgeonReport}</div>
-            <Ghost onClick={() => navigator.clipboard?.writeText(surgeonReport)} style={{ marginTop:"8px", width:"100%", textAlign:"center" }}>Copy to Clipboard</Ghost>
+      <Card border={`${C.blueLight}40`} bg={C.bluePale}>
+        <Lbl color={C.blue}>🏥 Surgeon Visit Prep</Lbl>
+                  <div style={{fontFamily:bar,fontSize:TS.body,color:C.textSecondary,lineHeight:"1.6",fontWeight:600,marginBottom:"16px"}}>Generate a summary of your recovery to share with Dr. Myers — built from your actual check-in data.</div>
+        <Btn onClick={generateReport} full bg={C.blue} disabled={loadingReport}>{loadingReport?"Generating...":"Generate Visit Summary"}</Btn>
+        {surgeonReport&&(
+          <div style={{marginTop:"16px"}}>
+            <div style={{background:C.white,border:`1px solid ${C.border}`,borderRadius:"8px",padding:"16px",fontFamily:cor,fontSize:TS.bodySm,color:C.textPrimary,lineHeight:"1.9",whiteSpace:"pre-wrap"}}>{surgeonReport}</div>
+            <Ghost onClick={()=>navigator.clipboard?.writeText(surgeonReport)} style={{marginTop:"10px",width:"100%",textAlign:"center"}}>Copy to Clipboard</Ghost>
           </div>
         )}
       </Card>
 
-      <Card border={`${C.blueLight}40`} bg={`${C.blue}15`}>
-        <div onClick={() => setPrepOpen(o=>!o)} style={{ cursor:"pointer", userSelect:"none", display:"flex", justifyContent:"space-between", alignItems:"center" }}>
+      <Card>
+        <div onClick={()=>setPrepOpen(o=>!o)} style={{cursor:"pointer",userSelect:"none",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
           <div>
-            <div style={{ fontFamily:bb, fontSize:"20px", letterSpacing:"2px", color:C.blueLight }}>📋 PT Session Prep</div>
-            <div style={{ fontFamily:cor, fontSize:"13px", fontStyle:"italic", color:C.ash, marginTop:"3px" }}>What to tell your PT today</div>
+            <div style={{fontFamily:bb,fontSize:TS.subhead,letterSpacing:"1px",color:C.navy}}>📋 PT Session Prep</div>
+            <div style={{fontFamily:bar,fontSize:TS.bodySm,fontStyle:"italic",color:C.textSecondary,marginTop:"4px",fontWeight:600}}>What to tell your PT today</div>
           </div>
-          <span style={{ color:C.steel }}>{prepOpen?"▲":"▼"}</span>
+          <span style={{color:C.textMuted,fontSize:"16px"}}>{prepOpen?"▲":"▼"}</span>
         </div>
-        {prepOpen && (
-          <div style={{ marginTop:"14px", borderTop:`1px solid ${C.iron}`, paddingTop:"14px" }}>
-            <div style={{ fontFamily:cor, fontSize:"14px", color:C.bone, lineHeight:"1.9" }}>
-              <strong style={{ color:C.blueLight, fontFamily:bar, fontSize:"10px", letterSpacing:"2px", textTransform:"uppercase" }}>Report:</strong><br/>
+        {prepOpen&&(
+          <div style={{marginTop:"16px",borderTop:`1px solid ${C.border}`,paddingTop:"16px"}}>
+            <div style={{fontFamily:bar,fontSize:TS.body,color:C.textPrimary,lineHeight:"2",fontWeight:600}}>
+              <strong style={{color:C.navyMid,fontFamily:bar,fontSize:TS.label,textTransform:"uppercase",fontWeight:900}}>Report:</strong><br/>
               • Current pain level and any sharp pain episodes<br/>
               • Swelling trend (better / same / worse)<br/>
               • Night wakeups and sleep quality<br/>
@@ -795,163 +790,148 @@ Write a concise 1-page surgical visit summary. Sections: Progress Summary, Pain 
       <Card>
         <Lbl>Session Debrief</Lbl>
         <TA value={debrief} onChange={e=>setDebrief(e.target.value)} placeholder="What your PT said today — exercises, feedback, next targets..." rows={3}/>
-        <Btn onClick={saveDebrief} full style={{ marginTop:"10px" }}>Save Debrief</Btn>
-        {debriefs.length > 0 && (
-          <div style={{ marginTop:"14px" }}>
-            {[...debriefs].reverse().slice(0,3).map((d,i) => (
-              <div key={d.id} style={{ padding:"10px 0", borderTop:`1px solid ${C.iron}` }}>
-                <div style={{ fontFamily:bar, fontSize:"9px", letterSpacing:"2px", color:C.steel, textTransform:"uppercase", marginBottom:"4px" }}>Day {d.day} · {d.date}</div>
-                <div style={{ fontFamily:cor, fontSize:"14px", fontStyle:"italic", color:C.ash, lineHeight:"1.6" }}>{d.text}</div>
+        <Btn onClick={saveDebrief} full bg={C.navyMid} style={{marginTop:"12px"}}>Save Debrief</Btn>
+        {debriefs.length>0&&(
+          <div style={{marginTop:"16px"}}>
+            {[...debriefs].reverse().slice(0,3).map((d,i)=>(
+              <div key={d.id} style={{padding:"12px 0",borderTop:`1px solid ${C.border}`}}>
+                <div style={{fontFamily:bar,fontSize:TS.labelSm,color:C.textMuted,textTransform:"uppercase",marginBottom:"6px",fontWeight:700}}>Day {d.day} · {d.date}</div>
+                <div style={{fontFamily:bar,fontSize:TS.body,color:C.textSecondary,lineHeight:"1.7",fontWeight:600}}>{d.text}</div>
               </div>
             ))}
           </div>
         )}
       </Card>
 
-      {/* ROM Tracker — config-driven, adapts to any surgery type */}
-      <Card border={`${C.goldMid}50`}>
-        <div style={{ display:"flex", justifyContent:"space-between", alignItems:"flex-start", marginBottom:"4px" }}>
-          <Lbl mb={2}>📐 Range of Motion</Lbl>
-          <div style={{ fontFamily:bar, fontSize:"9px", letterSpacing:"1px", color:C.steel, textTransform:"uppercase", textAlign:"right" }}>
-            {ACTIVE_SURGERY.short}<br/>
-            {ROM_CONFIG.joint} {ROM_CONFIG.metric}
-          </div>
+      {/* ROM Tracker */}
+      <Card border={`${C.goldMid}50`} bg={C.goldPale}>
+        <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:"6px"}}>
+          <Lbl color={C.goldDeep} mb={4}>📐 Range of Motion</Lbl>
+          <div style={{fontFamily:bar,fontSize:TS.labelSm,color:C.textMuted,textTransform:"uppercase",textAlign:"right"}}>{ACTIVE_SURGERY.short}<br/>{ROM_CONFIG.joint} {ROM_CONFIG.metric}</div>
         </div>
-        <div style={{ fontFamily:cor, fontSize:"13px", fontStyle:"italic", color:C.ash, marginBottom:"14px", lineHeight:"1.6" }}>
-          {ROM_CONFIG.mode === "bilateral" ? "Tracking both sides independently." : `Tracking ${ROM_CONFIG.sides[0]} ${ROM_CONFIG.joint.toLowerCase()} only.`}
-          {" "}Phase target: <span style={{ color:C.goldBright, fontFamily:bar, fontSize:"13px" }}>{romTarget}{ROM_CONFIG.unit}</span>
+        <div style={{fontFamily:cor,fontSize:TS.bodySm,fontStyle:"italic",color:C.textSecondary,marginBottom:"16px",lineHeight:"1.7"}}>
+          {ROM_CONFIG.mode==="bilateral"?"Tracking both sides independently.":`Tracking ${ROM_CONFIG.sides[0]} ${ROM_CONFIG.joint.toLowerCase()} only.`}
+          {" "}Phase target: <span style={{color:C.goldDeep,fontFamily:bb,fontSize:TS.subhead}}>{romTarget}{ROM_CONFIG.unit}</span>
         </div>
-
-        {/* Latest reading gauges */}
-        {latestRom && (
-          <div style={{ display:"flex", gap:"8px", marginBottom:"14px" }}>
-            {ROM_CONFIG.sides.map(side => {
-              const val = latestRom.vals?.[side] ?? latestRom[side.toLowerCase()] ?? 0;
-              const pct = Math.min(100, Math.round((val / romTarget) * 100));
-              const col = pct >= 90 ? C.greenLight : pct >= 60 ? C.goldBright : C.warnLight;
-              const sideColor = ROM_CONFIG.chartColors[side] || C.goldMid;
+        {latestRom&&(
+          <div style={{display:"flex",gap:"10px",marginBottom:"16px"}}>
+            {ROM_CONFIG.sides.map(side=>{
+              const val=latestRom.vals?.[side]??latestRom[side.toLowerCase()]??0;
+              const pct=Math.min(100,Math.round((val/romTarget)*100));
+              const col=pct>=90?C.greenLight:pct>=60?C.orangeLight:C.redLight;
+              const sc=ROM_CONFIG.chartColors[side]||C.goldMid;
               return (
-                <div key={side} style={{ flex:1, background:C.char, border:`1px solid ${C.iron}`, borderRadius:"3px", padding:"12px", textAlign:"center" }}>
-                  <div style={{ fontFamily:bar, fontSize:"9px", letterSpacing:"2px", color:sideColor, textTransform:"uppercase", marginBottom:"6px" }}>
-                    {ROM_CONFIG.mode === "bilateral" ? `${side} ${ROM_CONFIG.joint}` : `${side} ${ROM_CONFIG.joint}`}
+                <div key={side} style={{flex:1,background:C.white,border:`1.5px solid ${C.border}`,borderRadius:"10px",padding:"14px",textAlign:"center"}}>
+                  <div style={{fontFamily:bar,fontSize:TS.labelSm,color:sc,textTransform:"uppercase",marginBottom:"8px",fontWeight:700}}>{side} {ROM_CONFIG.joint}</div>
+                  <div style={{fontFamily:bb,fontSize:"44px",letterSpacing:"2px",color:col,lineHeight:1}}>{val}{ROM_CONFIG.unit}</div>
+                  <div style={{height:"5px",background:C.border,borderRadius:"3px",overflow:"hidden",marginTop:"10px"}}>
+                    <div style={{width:`${pct}%`,height:"100%",background:col}}/>
                   </div>
-                  <div style={{ fontFamily:bb, fontSize:"36px", letterSpacing:"2px", color:col, lineHeight:1 }}>{val}{ROM_CONFIG.unit}</div>
-                  <div style={{ height:"4px", background:C.iron, borderRadius:"2px", overflow:"hidden", marginTop:"8px" }}>
-                    <div style={{ width:`${pct}%`, height:"100%", background:col }}/>
-                  </div>
-                  <div style={{ fontFamily:bar, fontSize:"9px", letterSpacing:"1px", color:col, marginTop:"4px" }}>{pct}% of {romTarget}{ROM_CONFIG.unit} target</div>
+                  <div style={{fontFamily:bar,fontSize:TS.labelSm,color:col,marginTop:"6px"}}>{pct}% of {romTarget}{ROM_CONFIG.unit}</div>
                 </div>
               );
             })}
           </div>
         )}
-
-        {/* Sliders — one per configured side */}
-        <div style={{ display:"flex", gap:"12px", marginBottom:"12px" }}>
-          {ROM_CONFIG.sides.map(side => (
-            <div key={side} style={{ flex:1 }}>
-              <div style={{ fontFamily:bar, fontSize:"10px", letterSpacing:"2px", color:C.ash, textTransform:"uppercase", marginBottom:"6px" }}>
-                {side} · <span style={{ color:ROM_CONFIG.chartColors[side] || C.goldBright }}>{romVals[side]}{ROM_CONFIG.unit}</span>
+        <div style={{display:"flex",gap:"14px",marginBottom:"14px"}}>
+          {ROM_CONFIG.sides.map(side=>(
+            <div key={side} style={{flex:1}}>
+              <div style={{fontFamily:bar,fontSize:TS.label,color:C.textSecondary,textTransform:"uppercase",marginBottom:"8px"}}>
+                {side} · <span style={{color:ROM_CONFIG.chartColors[side]||C.goldDeep,fontFamily:bb,fontSize:TS.subhead}}>{romVals[side]}{ROM_CONFIG.unit}</span>
               </div>
-              <input type="range"
-                min={ROM_CONFIG.min} max={ROM_CONFIG.max} step={ROM_CONFIG.step}
-                value={romVals[side]}
-                onChange={e => setRomVals(v => ({...v, [side]: Number(e.target.value)}))}
-                style={{ width:"100%", accentColor:ROM_CONFIG.chartColors[side] || C.goldBright, height:"6px", cursor:"pointer" }}
+              <input type="range" min={ROM_CONFIG.min} max={ROM_CONFIG.max} step={ROM_CONFIG.step} value={romVals[side]}
+                onChange={e=>setRomVals(v=>({...v,[side]:Number(e.target.value)}))}
+                style={{width:"100%",accentColor:ROM_CONFIG.chartColors[side]||C.goldDeep,height:"8px",cursor:"pointer"}}
               />
-              <div style={{ display:"flex", justifyContent:"space-between", fontFamily:bar, fontSize:"9px", color:C.steel, marginTop:"3px" }}>
-                <span>{ROM_CONFIG.min}{ROM_CONFIG.unit}</span>
-                <span>{Math.round((ROM_CONFIG.min+ROM_CONFIG.max)/2)}{ROM_CONFIG.unit}</span>
-                <span>{ROM_CONFIG.max}{ROM_CONFIG.unit}</span>
+              <div style={{display:"flex",justifyContent:"space-between",fontFamily:bar,fontSize:TS.labelSm,color:C.textMuted,marginTop:"5px"}}>
+                <span>{ROM_CONFIG.min}{ROM_CONFIG.unit}</span><span>{Math.round((ROM_CONFIG.min+ROM_CONFIG.max)/2)}{ROM_CONFIG.unit}</span><span>{ROM_CONFIG.max}{ROM_CONFIG.unit}</span>
               </div>
             </div>
           ))}
         </div>
-
-        <Inp value={romNote} onChange={e => setRomNote(e.target.value)} placeholder="Optional note — pain level, session context, position used..." style={{ marginBottom:"10px" }}/>
-        <Btn onClick={saveRom} full disabled={allZero}>Log ROM Reading</Btn>
-
-        {/* History */}
-        {romLog.length > 0 && (
-          <div style={{ marginTop:"16px" }}>
-            <div style={{ fontFamily:bar, fontSize:"10px", letterSpacing:"3px", color:C.steel, textTransform:"uppercase", marginBottom:"10px" }}>History</div>
-
-            {/* Mini trend chart */}
-            <div style={{ display:"flex", gap:"2px", alignItems:"flex-end", height:"48px", marginBottom:"6px" }}>
-              {romLog.slice(-20).map((r, i) => (
-                <div key={i} style={{ flex:1, display:"flex", gap:"1px", alignItems:"flex-end", minWidth:"6px" }}>
-                  {ROM_CONFIG.sides.map(side => {
-                    const val = r.vals?.[side] ?? r[side.toLowerCase()] ?? 0;
-                    const h = Math.round((val / ROM_CONFIG.max) * 48);
-                    return <div key={side} style={{ flex:1, height:`${h}px`, background:ROM_CONFIG.chartColors[side]||C.goldMid, borderRadius:"1px 1px 0 0" }}/>;
+        <Inp value={romNote} onChange={e=>setRomNote(e.target.value)} placeholder="Optional note — pain level, session context..." style={{marginBottom:"12px"}}/>
+        <Btn onClick={saveRom} full bg={allZero?"#c0c8d8":C.goldDeep} disabled={allZero}>Log ROM Reading</Btn>
+        {romLog.length>0&&(
+          <div style={{marginTop:"18px"}}>
+            <div style={{fontFamily:bar,fontSize:TS.label,color:C.textSecondary,textTransform:"uppercase",marginBottom:"12px"}}>History</div>
+            <div style={{display:"flex",gap:"2px",alignItems:"flex-end",height:"52px",marginBottom:"8px"}}>
+              {romLog.slice(-20).map((r,i)=>(
+                <div key={i} style={{flex:1,display:"flex",gap:"1px",alignItems:"flex-end",minWidth:"6px"}}>
+                  {ROM_CONFIG.sides.map(side=>{
+                    const val=r.vals?.[side]??r[side.toLowerCase()]??0;
+                    const h=Math.round((val/ROM_CONFIG.max)*52);
+                    return <div key={side} style={{flex:1,height:`${h}px`,background:ROM_CONFIG.chartColors[side]||C.goldMid,borderRadius:"2px 2px 0 0"}}/>;
                   })}
                 </div>
               ))}
             </div>
-
-            {/* Legend — only shown for bilateral */}
-            {ROM_CONFIG.mode === "bilateral" && (
-              <div style={{ display:"flex", gap:"12px", fontFamily:bar, fontSize:"9px", letterSpacing:"1px", color:C.ash, textTransform:"uppercase", marginBottom:"10px" }}>
-                {ROM_CONFIG.sides.map(side => (
-                  <span key={side} style={{ display:"flex", alignItems:"center", gap:"4px" }}>
-                    <span style={{ width:"8px", height:"8px", background:ROM_CONFIG.chartColors[side], borderRadius:"1px", display:"inline-block" }}/>
+            {ROM_CONFIG.mode==="bilateral"&&(
+              <div style={{display:"flex",gap:"14px",fontFamily:bar,fontSize:TS.labelSm,color:C.textSecondary,textTransform:"uppercase",marginBottom:"12px"}}>
+                {ROM_CONFIG.sides.map(side=>(
+                  <span key={side} style={{display:"flex",alignItems:"center",gap:"6px"}}>
+                    <span style={{width:"10px",height:"10px",background:ROM_CONFIG.chartColors[side],borderRadius:"2px",display:"inline-block"}}/>
                     {side}
                   </span>
                 ))}
               </div>
             )}
-
-            {/* Log entries */}
-            {[...romLog].reverse().slice(0, 5).map((r, i) => (
-              <div key={r.id} style={{ display:"flex", justifyContent:"space-between", alignItems:"flex-start", padding:"8px 0", borderBottom:i<Math.min(romLog.length,5)-1?`1px solid ${C.iron}`:"none" }}>
+            {[...romLog].reverse().slice(0,5).map((r,i)=>(
+              <div key={r.id} style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",padding:"10px 0",borderBottom:i<Math.min(romLog.length,5)-1?`1px solid ${C.border}`:"none"}}>
                 <div>
-                  <div style={{ fontFamily:bar, fontSize:"11px", letterSpacing:"1px", color:C.bone, textTransform:"uppercase" }}>
-                    {ROM_CONFIG.sides.map((side, si) => {
-                      const val = r.vals?.[side] ?? r[side.toLowerCase()] ?? 0;
-                      return (
-                        <span key={side}>
-                          {si > 0 && " · "}
-                          {ROM_CONFIG.mode === "bilateral" ? `${side} ` : ""}
-                          <span style={{ color:ROM_CONFIG.chartColors[side]||C.goldMid }}>{val}{ROM_CONFIG.unit}</span>
-                        </span>
-                      );
+                  <div style={{fontFamily:bar,fontSize:TS.label,color:C.textPrimary,textTransform:"uppercase"}}>
+                    {ROM_CONFIG.sides.map((side,si)=>{
+                      const val=r.vals?.[side]??r[side.toLowerCase()]??0;
+                      return <span key={side}>{si>0&&" · "}{ROM_CONFIG.mode==="bilateral"?`${side} `:""}<span style={{color:ROM_CONFIG.chartColors[side]||C.goldDeep,fontWeight:700}}>{val}{ROM_CONFIG.unit}</span></span>;
                     })}
                   </div>
-                  <div style={{ fontFamily:bar, fontSize:"9px", letterSpacing:"1px", color:C.steel, marginTop:"3px", textTransform:"uppercase" }}>Day {r.day} · {r.date}</div>
-                  {r.note ? <div style={{ fontFamily:cor, fontSize:"12px", fontStyle:"italic", color:C.ash, marginTop:"3px" }}>{r.note}</div> : null}
+                  <div style={{fontFamily:bar,fontSize:TS.labelSm,color:C.textMuted,marginTop:"4px",textTransform:"uppercase"}}>Day {r.day} · {r.date}</div>
+                  {r.note?<div style={{fontFamily:cor,fontSize:TS.caption,fontStyle:"italic",color:C.textSecondary,marginTop:"4px"}}>{r.note}</div>:null}
                 </div>
-                <button onClick={() => delRom(r.id)} style={{ background:"transparent", border:"none", color:C.steel, cursor:"pointer", fontSize:"16px" }}>×</button>
+                <button onClick={()=>delRom(r.id)} style={{background:"transparent",border:"none",color:C.textMuted,cursor:"pointer",fontSize:"18px"}}>×</button>
               </div>
             ))}
-            {romLog.length > 5 && <div style={{ fontFamily:bar, fontSize:"9px", letterSpacing:"1px", color:C.steel, textAlign:"center", marginTop:"8px", textTransform:"uppercase" }}>{romLog.length - 5} more entries in history</div>}
+            {romLog.length>5&&<div style={{fontFamily:bar,fontSize:TS.labelSm,color:C.textMuted,textAlign:"center",marginTop:"10px",textTransform:"uppercase"}}>{romLog.length-5} more entries</div>}
           </div>
         )}
       </Card>
 
-      {protocols.map((s,si) => (
+      {protocols.map((s,si)=>(
         <Card key={si}>
-          <div style={{ fontFamily:bb, fontSize:"18px", letterSpacing:"2px", color:C.white, marginBottom:"12px" }}>{s.icon} {s.cat}</div>
-          {s.items.map((item,ii) => (
-            <div key={ii} style={{ padding:"7px 0", borderBottom:ii<s.items.length-1?`1px solid ${C.iron}`:"none" }}>
-              <div style={{ fontFamily:bar, fontSize:"12px", letterSpacing:"1px", color:C.goldMid, textTransform:"uppercase" }}>{item.l}</div>
-              <div style={{ fontFamily:cor, fontSize:"13px", fontStyle:"italic", color:C.ash, marginTop:"2px", lineHeight:"1.5" }}>{item.d}</div>
+          <div style={{fontFamily:bb,fontSize:TS.subhead,letterSpacing:"1px",color:C.navy,marginBottom:"14px"}}>{s.icon} {s.cat}</div>
+          {s.items.map((item,ii)=>(
+            <div key={ii} style={{padding:"12px 0",borderBottom:`1px solid ${C.border}`}}>
+              <div style={{fontFamily:bar,fontSize:TS.label,color:C.navyMid,textTransform:"uppercase",fontWeight:900,marginBottom:"6px"}}>{item.l}</div>
+              <div style={{fontFamily:bar,fontSize:TS.body,color:C.textSecondary,lineHeight:"1.6",fontWeight:600}}>{item.d}</div>
             </div>
           ))}
+          {(customProtocols[s.cat]||[]).map((item)=>(
+            <div key={item.id} style={{padding:"12px 0",borderBottom:`1px solid ${C.border}`,display:"flex",alignItems:"flex-start",gap:"10px"}}>
+              <div style={{flex:1}}>
+                <div style={{fontFamily:bar,fontSize:TS.label,color:s.cat==="Therapeutic Exercise"?C.teal:s.cat==="Neuromuscular/Balance"?C.blue:C.green,textTransform:"uppercase",fontWeight:900,marginBottom:"6px"}}>{item.l}</div>
+                <div style={{fontFamily:bar,fontSize:TS.body,color:C.textSecondary,lineHeight:"1.6",fontWeight:600}}>Added by you</div>
+              </div>
+              <button onClick={()=>delProtocolItem(s.cat,item.id)} style={{background:"transparent",border:"none",color:C.textMuted,cursor:"pointer",fontSize:"22px",flexShrink:0,paddingTop:"2px"}}>×</button>
+            </div>
+          ))}
+          <div style={{display:"flex",gap:"10px",marginTop:"14px"}}>
+            <Inp value={newProtocolItem[s.cat]} onChange={e=>setNewProtocolItem(p=>({...p,[s.cat]:e.target.value}))} placeholder={`Add ${s.cat} entry...`}/>
+            <Btn onClick={()=>addProtocolItem(s.cat)} bg={s.cat==="Therapeutic Exercise"?C.teal:s.cat==="Neuromuscular/Balance"?C.blue:C.green} style={{padding:"13px 18px",flexShrink:0}}>+</Btn>
+          </div>
         </Card>
       ))}
 
       <Card>
         <Lbl>My PT's Recommendations</Lbl>
-        <div style={{ display:"flex", gap:"8px", marginBottom:"10px" }}>
+        <div style={{display:"flex",gap:"10px",marginBottom:"12px"}}>
           <Inp value={newItem} onChange={e=>setNewItem(e.target.value)} placeholder="Add exercise or recommendation..."/>
-          <Btn onClick={addItem} style={{ padding:"11px 16px" }}>+</Btn>
+          <Btn onClick={addItem} bg={C.navyMid} style={{padding:"13px 18px"}}>+</Btn>
         </div>
-        {ptItems.length===0 && <div style={{ fontFamily:cor, fontSize:"13px", fontStyle:"italic", color:C.steel }}>Add PT-specific items here.</div>}
-        {ptItems.map(item => (
-          <div key={item.id} style={{ display:"flex", gap:"8px", padding:"8px 0", borderBottom:`1px solid ${C.iron}`, alignItems:"center" }}>
-            <span style={{ color:C.goldMid, fontSize:"10px" }}>◆</span>
-            <span style={{ fontFamily:cor, fontSize:"14px", color:C.bone, flex:1 }}>{item.label}</span>
-            <button onClick={() => { const u=ptItems.filter(x=>x.id!==item.id); setPtItems(u); save("ax_ptitems_v2",u); }} style={{ background:"transparent", border:"none", color:C.steel, cursor:"pointer", fontSize:"18px" }}>×</button>
+        {ptItems.length===0&&<div style={{fontFamily:cor,fontSize:TS.bodySm,fontStyle:"italic",color:C.textMuted}}>Add PT-specific items here.</div>}
+        {ptItems.map(item=>(
+          <div key={item.id} style={{display:"flex",gap:"10px",padding:"10px 0",borderBottom:`1px solid ${C.border}`,alignItems:"center"}}>
+            <span style={{color:C.navyMid,fontSize:"12px"}}>◆</span>
+            <span style={{fontFamily:cor,fontSize:TS.body,color:C.textPrimary,flex:1}}>{item.label}</span>
+            <button onClick={()=>{const u=ptItems.filter(x=>x.id!==item.id);setPtItems(u);save("ax_ptitems_v2",u);}} style={{background:"transparent",border:"none",color:C.textMuted,cursor:"pointer",fontSize:"20px"}}>×</button>
           </div>
         ))}
       </Card>
@@ -960,80 +940,237 @@ Write a concise 1-page surgical visit summary. Sections: Progress Summary, Pain 
 }
 
 // ══════════════════════════════════════════════════════════════════════════════
-// SUPPORT
+// TIMELINE SCREEN
 // ══════════════════════════════════════════════════════════════════════════════
-function SupportScreen() {
-  const [breathing, setBreathing] = useState(false);
-  const [bPhase, setBPhase] = useState("inhale");
-  const [bCount, setBCount] = useState(0);
-  const [open, setOpen] = useState(null);
-  const bRef = useRef(null);
+function TimelineScreen({ days, onBack }) {
+  const phase = getPhase(days);
+  const totalWeeks = 52;
+  const currentWeek = Math.floor(days / 7);
 
-  const startBreath = () => {
-    setBreathing(true); setBPhase("inhale"); setBCount(0);
-    let count=0, pi=0;
-    const phases=["inhale","hold","exhale","hold2"], dur={inhale:4000,hold:4000,exhale:4000,hold2:4000};
-    const next = () => { pi=(pi+1)%4; if(pi===0)count++; setBPhase(phases[pi]); setBCount(count); if(count<4) bRef.current=setTimeout(next,dur[phases[pi]]); else{setBreathing(false);setBPhase("inhale");} };
-    bRef.current = setTimeout(next, 4000);
-  };
-  useEffect(() => () => { if(bRef.current) clearTimeout(bRef.current); }, []);
-  const bLabel = { inhale:"Breathe In", hold:"Hold", exhale:"Breathe Out", hold2:"Hold" };
-  const bColor = { inhale:C.blueLight, hold:C.steel, exhale:C.greenLight, hold2:C.steel };
+  const phaseWeekBands = [
+    { id:1, name:"Acute Protection",   startWk:0,  endWk:2,  color:C.red,      icon:"🛡️" },
+    { id:2, name:"Early Mobilization", startWk:2,  endWk:6,  color:C.orange,   icon:"🦵" },
+    { id:3, name:"Strength Building",  startWk:6,  endWk:12, color:C.warn,     icon:"💪" },
+    { id:4, name:"Functional Return",  startWk:12, endWk:20, color:C.teal,     icon:"🔄" },
+    { id:5, name:"Summit",             startWk:20, endWk:52, color:C.green,    icon:"🏔️" },
+  ];
+
+  const milestoneRows = [
+    { label:"Off crutches",             week:6,  phase:2 },
+    { label:"ROM 90°",                  week:6,  phase:2 },
+    { label:"ROM 120°",                 week:10, phase:3 },
+    { label:"Single-leg stance",        week:10, phase:3 },
+    { label:"Full ROM 135°+",           week:14, phase:4 },
+    { label:"Light jog",                week:16, phase:4 },
+    { label:"Return to all activity",   week:21, phase:5 },
+    { label:"Strength symmetry >90%",   week:26, phase:5 },
+  ];
+
+  // visible week window — show 13 weeks centered on current
+  const windowSize = 13;
+  const startDisplay = Math.max(0, Math.min(currentWeek - 4, totalWeeks - windowSize));
+  const visibleWeeks = Array.from({ length: windowSize }, (_, i) => startDisplay + i);
 
   return (
-    <div style={{ padding:"14px 14px 80px", maxWidth:640, margin:"0 auto" }}>
-      <div style={{ textAlign:"center", padding:"10px 0 18px" }}>
-        <Caduceus size={40} color={C.blueLight}/>
-        <div style={{ fontFamily:bb, fontSize:"26px", letterSpacing:"4px", color:C.white, marginTop:"10px" }}>Support</div>
-        <div style={{ fontFamily:cor, fontSize:"14px", fontStyle:"italic", color:C.ash, marginTop:"4px" }}>You don't have to get through this alone.</div>
+    <div style={{ minHeight:"100vh", background:C.page, fontFamily:cor }}>
+      <div style={{ background:`linear-gradient(135deg,${C.navyDeep},${C.navyMid})`, padding:"16px 18px", display:"flex", alignItems:"center", gap:"14px", boxShadow:"0 2px 12px rgba(6,20,40,0.3)" }}>
+        <button onClick={onBack} style={{ background:"rgba(255,255,255,0.15)", border:"none", color:C.white, borderRadius:"8px", padding:"8px 14px", fontFamily:bar, fontSize:TS.label, cursor:"pointer", fontWeight:700 }}>← Back</button>
+        <div>
+          <div style={{ fontFamily:bb, fontSize:"26px", letterSpacing:"3px", color:C.goldBright, lineHeight:1 }}>Recovery Timeline</div>
+          <div style={{ fontFamily:bar, fontSize:TS.labelSm, color:"rgba(255,255,255,0.6)", textTransform:"uppercase", marginTop:"3px" }}>Week {currentWeek} of 52 · {phase.name}</div>
+        </div>
       </div>
 
-      <Card border={`${C.redLight}40`} bg={`${C.red}12`}>
-        <Lbl color={C.redLight}>If You Need Help Now</Lbl>
-        {[{label:"Surgeon's Line",detail:"Call your care team's after-hours line",icon:"🏥"},{label:"Your PT",detail:"Text or call — they want to know",icon:"🤲"},{label:"Crisis Line",detail:"988 — Suicide & Crisis Lifeline",icon:"💙"}].map((c,i) => (
-          <div key={i} style={{ display:"flex", gap:"12px", padding:"11px 0", borderBottom:i<2?`1px solid ${C.iron}`:"none", alignItems:"center" }}>
-            <span style={{ fontSize:"24px" }}>{c.icon}</span>
+      <div style={{ padding:"16px 16px 90px", maxWidth:640, margin:"0 auto" }}>
+
+        {/* Phase legend */}
+        <Card>
+          <Lbl mb={12}>Phases</Lbl>
+          {phaseWeekBands.map(p => (
+            <div key={p.id} style={{ display:"flex", alignItems:"center", gap:"12px", padding:"8px 0", borderBottom:`1px solid ${C.border}` }}>
+              <div style={{ width:"14px", height:"14px", borderRadius:"3px", background:p.color, flexShrink:0 }}/>
+              <div style={{ flex:1, fontFamily:bar, fontSize:TS.labelSm, color:C.textPrimary, fontWeight:700, textTransform:"uppercase" }}>{p.icon} {p.name}</div>
+              <div style={{ fontFamily:bar, fontSize:TS.labelSm, color:C.textMuted, fontWeight:600 }}>Wks {p.startWk}–{p.endWk}</div>
+            </div>
+          ))}
+        </Card>
+
+        {/* Gantt chart */}
+        <Card style={{ overflowX:"auto" }}>
+          <Lbl mb={14}>Week-by-Week Gantt — Weeks {startDisplay}–{startDisplay + windowSize - 1}</Lbl>
+
+          {/* Week number header */}
+          <div style={{ display:"flex", marginBottom:"4px", paddingLeft:"110px" }}>
+            {visibleWeeks.map(wk => (
+              <div key={wk} style={{ flex:1, textAlign:"center", fontFamily:bar, fontSize:"11px", fontWeight:wk===currentWeek?900:600, color:wk===currentWeek?C.navyMid:C.textMuted, textTransform:"uppercase" }}>
+                {wk===currentWeek ? `▼${wk}` : wk}
+              </div>
+            ))}
+          </div>
+
+          {/* Phase bars */}
+          {phaseWeekBands.map(p => (
+            <div key={p.id} style={{ display:"flex", alignItems:"center", marginBottom:"8px" }}>
+              <div style={{ width:"110px", fontFamily:bar, fontSize:"12px", fontWeight:700, color:C.textSecondary, textTransform:"uppercase", paddingRight:"8px", flexShrink:0, lineHeight:1.3 }}>{p.icon} {p.name.split(" ")[0]}</div>
+              <div style={{ flex:1, display:"flex", height:"28px" }}>
+                {visibleWeeks.map(wk => {
+                  const inPhase = wk >= p.startWk && wk < p.endWk;
+                  const isCurrent = wk === currentWeek;
+                  const isActive = p.id === phase.id;
+                  return (
+                    <div key={wk} style={{ flex:1, height:"100%", background:inPhase ? p.color : "transparent", opacity:inPhase ? (isActive ? 1 : 0.35) : 1, borderRadius: wk===p.startWk?"4px 0 0 4px": wk===p.endWk-1?"0 4px 4px 0":"0", position:"relative" }}>
+                      {isCurrent && inPhase && (
+                        <div style={{ position:"absolute", top:0, bottom:0, left:"50%", width:"3px", background:C.navyDeep, transform:"translateX(-50%)", borderRadius:"2px" }}/>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          ))}
+
+          {/* Divider */}
+          <div style={{ height:"1px", background:C.border, margin:"12px 0" }}/>
+
+          {/* Milestone markers */}
+          <div style={{ marginBottom:"6px", paddingLeft:"110px", position:"relative", height:"32px" }}>
+            {visibleWeeks.map((wk, i) => {
+              const ms = milestoneRows.filter(m => m.week === wk);
+              if (!ms.length) return <div key={wk} style={{ flex:1, display:"inline-block", width:`${100/windowSize}%` }}/>;
+              const p = phaseWeekBands.find(p => p.id === ms[0].phase);
+              return (
+                <div key={wk} style={{ position:"absolute", left:`${(i / windowSize) * 100}%`, top:0, width:`${100/windowSize}%`, display:"flex", flexDirection:"column", alignItems:"center" }}>
+                  <div style={{ width:"14px", height:"14px", borderRadius:"50%", background:p?.color || C.navyMid, border:`2px solid ${C.white}`, boxShadow:"0 1px 3px rgba(0,0,0,0.2)" }}/>
+                </div>
+              );
+            })}
+          </div>
+          <div style={{ paddingLeft:"110px", fontFamily:bar, fontSize:"11px", color:C.textMuted, fontWeight:600, textTransform:"uppercase", marginBottom:"10px" }}>● Milestones</div>
+
+          {/* Current week indicator */}
+          {visibleWeeks.includes(currentWeek) && (
+            <div style={{ background:C.navyPale, border:`1.5px solid ${C.navyMid}`, borderRadius:"8px", padding:"10px 14px", marginTop:"8px", display:"flex", alignItems:"center", gap:"10px" }}>
+              <div style={{ width:"12px", height:"12px", borderRadius:"2px", background:C.navyMid, flexShrink:0 }}/>
+              <div style={{ fontFamily:bar, fontSize:TS.labelSm, color:C.navyMid, fontWeight:700, textTransform:"uppercase" }}>You are here — Week {currentWeek} · Day {days} · {phase.name}</div>
+            </div>
+          )}
+        </Card>
+
+        {/* Upcoming milestones */}
+        <Card>
+          <Lbl mb={12}>Upcoming Milestones</Lbl>
+          {milestoneRows.filter(m => m.week > currentWeek).slice(0, 5).map((m, i) => {
+            const weeksAway = m.week - currentWeek;
+            const p = phaseWeekBands.find(p => p.id === m.phase);
+            return (
+              <div key={i} style={{ display:"flex", alignItems:"center", gap:"14px", padding:"12px 0", borderBottom:i<4?`1px solid ${C.border}`:"none" }}>
+                <div style={{ width:"44px", height:"44px", borderRadius:"10px", background:p?.color || C.navyMid, display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0 }}>
+                  <div style={{ fontFamily:bb, fontSize:"16px", color:C.white, letterSpacing:"1px" }}>Wk{m.week}</div>
+                </div>
+                <div style={{ flex:1 }}>
+                  <div style={{ fontFamily:bar, fontSize:TS.label, color:C.textPrimary, fontWeight:700, textTransform:"uppercase" }}>{m.label}</div>
+                  <div style={{ fontFamily:bar, fontSize:TS.labelSm, color:C.textMuted, marginTop:"3px", fontWeight:600 }}>{weeksAway} week{weeksAway!==1?"s":""} away · {p?.name}</div>
+                </div>
+              </div>
+            );
+          })}
+          {milestoneRows.filter(m => m.week > currentWeek).length === 0 && (
+            <div style={{ fontFamily:bar, fontSize:TS.body, color:C.greenLight, fontWeight:700, textAlign:"center", padding:"16px 0" }}>🏔️ All milestones reached. Summit achieved.</div>
+          )}
+        </Card>
+
+        {/* Completed milestones */}
+        {milestoneRows.filter(m => m.week <= currentWeek).length > 0 && (
+          <Card bg={C.greenPale} border={`${C.greenLight}40`}>
+            <Lbl color={C.green} mb={12}>Milestones Reached</Lbl>
+            {milestoneRows.filter(m => m.week <= currentWeek).map((m, i) => (
+              <div key={i} style={{ display:"flex", alignItems:"center", gap:"12px", padding:"10px 0", borderBottom:i<milestoneRows.filter(m=>m.week<=currentWeek).length-1?`1px solid ${C.greenLight}30`:"none" }}>
+                <span style={{ fontSize:"20px", flexShrink:0 }}>✅</span>
+                <div style={{ fontFamily:bar, fontSize:TS.label, color:C.green, fontWeight:700, textTransform:"uppercase" }}>{m.label}</div>
+                <div style={{ fontFamily:bar, fontSize:TS.labelSm, color:C.textMuted, marginLeft:"auto", fontWeight:600 }}>Wk {m.week}</div>
+              </div>
+            ))}
+          </Card>
+        )}
+
+      </div>
+    </div>
+  );
+}
+function SupportScreen() {
+  const [breathing,setBreathing]=useState(false);
+  const [bPhase,setBPhase]=useState("inhale");
+  const [bCount,setBCount]=useState(0);
+  const [open,setOpen]=useState(null);
+  const bRef=useRef(null);
+  const startBreath=()=>{
+    setBreathing(true);setBPhase("inhale");setBCount(0);
+    let count=0,pi=0;
+    const phases=["inhale","hold","exhale","hold2"],dur={inhale:4000,hold:4000,exhale:4000,hold2:4000};
+    const next=()=>{pi=(pi+1)%4;if(pi===0)count++;setBPhase(phases[pi]);setBCount(count);if(count<4)bRef.current=setTimeout(next,dur[phases[pi]]);else{setBreathing(false);setBPhase("inhale");}};
+    bRef.current=setTimeout(next,4000);
+  };
+  useEffect(()=>()=>{if(bRef.current)clearTimeout(bRef.current);},[]);
+  const bLabel={inhale:"Breathe In",hold:"Hold",exhale:"Breathe Out",hold2:"Hold"};
+  const bColor={inhale:C.blue,hold:C.textMuted,exhale:C.teal,hold2:C.textMuted};
+  const bPale={inhale:C.bluePale,hold:C.offwhite,exhale:C.tealPale,hold2:C.offwhite};
+
+  return (
+    <div style={{padding:"16px 16px 90px",maxWidth:640,margin:"0 auto"}}>
+      <div style={{textAlign:"center",padding:"8px 0 20px"}}>
+        <div style={{width:"64px",height:"64px",borderRadius:"20px",background:`linear-gradient(135deg,${C.navyDeep},${C.navyMid})`,display:"flex",alignItems:"center",justifyContent:"center",margin:"0 auto 12px"}}>
+          <Caduceus size={36} color="white"/>
+        </div>
+        <div style={{fontFamily:bb,fontSize:TS.display,letterSpacing:"3px",color:C.navy}}>Support</div>
+        <div style={{fontFamily:cor,fontSize:TS.body,fontStyle:"italic",color:C.textSecondary,marginTop:"6px"}}>You don't have to get through this alone.</div>
+      </div>
+
+      <Card border={`${C.redLight}40`} bg={C.redPale}>
+        <Lbl color={C.red}>If You Need Help Now</Lbl>
+        {[{label:"Surgeon's Line",detail:"Call your care team's after-hours line",icon:"🏥"},{label:"Your PT",detail:"Text or call — they want to know",icon:"🤲"},{label:"Crisis Line",detail:"988 — Suicide & Crisis Lifeline",icon:"💙"}].map((c,i)=>(
+          <div key={i} style={{display:"flex",gap:"14px",padding:"14px 0",borderBottom:i<2?`1px solid ${C.redLight}20`:"none",alignItems:"center"}}>
+            <span style={{fontSize:"28px"}}>{c.icon}</span>
             <div>
-              <div style={{ fontFamily:bar, fontSize:"13px", letterSpacing:"1px", color:C.white, textTransform:"uppercase" }}>{c.label}</div>
-              <div style={{ fontFamily:cor, fontSize:"13px", fontStyle:"italic", color:C.ash, marginTop:"2px" }}>{c.detail}</div>
+              <div style={{fontFamily:bar,fontSize:TS.label,color:C.textPrimary,textTransform:"uppercase",fontWeight:700}}>{c.label}</div>
+              <div style={{fontFamily:cor,fontSize:TS.bodySm,fontStyle:"italic",color:C.textSecondary,marginTop:"4px"}}>{c.detail}</div>
             </div>
           </div>
         ))}
       </Card>
 
-      <Card border={`${C.blueLight}30`} bg={`${C.blue}15`}>
-        <Lbl color={C.blueLight}>Read This Right Now</Lbl>
-        {REASSURANCES.map((r,i) => (
-          <div key={i} style={{ fontFamily:cor, fontSize:"16px", fontStyle:"italic", color:C.bone, lineHeight:"1.8", marginBottom:"14px", borderLeft:`3px solid ${C.iron}`, paddingLeft:"14px" }}>{r}</div>
+      <Card border={`${C.blue}30`} bg={C.bluePale}>
+        <Lbl color={C.blue}>Read This Right Now</Lbl>
+        {REASSURANCES.map((r,i)=>(
+          <div key={i} style={{fontFamily:cor,fontSize:TS.body,fontStyle:"italic",color:C.textPrimary,lineHeight:"1.9",marginBottom:"16px",borderLeft:`3px solid ${C.blueLight}`,paddingLeft:"16px"}}>{r}</div>
         ))}
       </Card>
 
       <Card>
         <Lbl>Box Breathing — 4×4×4×4</Lbl>
-        {!breathing ? (
+        {!breathing?(
           <div>
-            <div style={{ fontFamily:cor, fontSize:"14px", fontStyle:"italic", color:C.ash, lineHeight:"1.7", marginBottom:"14px" }}>4 rounds of box breathing activates your parasympathetic nervous system and reduces pain perception.</div>
-            <Btn onClick={startBreath} full>Start Breathing Exercise</Btn>
+            <div style={{fontFamily:cor,fontSize:TS.body,fontStyle:"italic",color:C.textSecondary,lineHeight:"1.8",marginBottom:"16px"}}>4 rounds of box breathing activates your parasympathetic nervous system and reduces pain perception.</div>
+            <Btn onClick={startBreath} full bg={C.navyMid}>Start Breathing Exercise</Btn>
           </div>
-        ) : (
-          <div style={{ textAlign:"center", padding:"24px 0" }}>
-            <div style={{ width:"100px", height:"100px", borderRadius:"50%", border:`4px solid ${bColor[bPhase]}`, margin:"0 auto 20px", display:"flex", alignItems:"center", justifyContent:"center", background:`${bColor[bPhase]}15`, transition:"all 0.5s ease" }}>
-              <div style={{ fontFamily:bb, fontSize:"32px", color:bColor[bPhase] }}>4</div>
+        ):(
+          <div style={{textAlign:"center",padding:"28px 0"}}>
+            <div style={{width:"120px",height:"120px",borderRadius:"50%",border:`4px solid ${bColor[bPhase]}`,margin:"0 auto 22px",display:"flex",alignItems:"center",justifyContent:"center",background:bPale[bPhase],transition:"all 0.5s ease"}}>
+              <div style={{fontFamily:bb,fontSize:"40px",color:bColor[bPhase]}}>4</div>
             </div>
-            <div style={{ fontFamily:bb, fontSize:"28px", letterSpacing:"4px", color:bColor[bPhase] }}>{bLabel[bPhase]}</div>
-            <div style={{ fontFamily:bar, fontSize:"11px", letterSpacing:"2px", color:C.ash, marginTop:"8px" }}>Round {bCount+1} of 4</div>
+            <div style={{fontFamily:bb,fontSize:TS.display,letterSpacing:"4px",color:bColor[bPhase]}}>{bLabel[bPhase]}</div>
+            <div style={{fontFamily:bar,fontSize:TS.label,color:C.textSecondary,marginTop:"10px"}}>Round {bCount+1} of 4</div>
           </div>
         )}
       </Card>
 
-      <Card border={`${C.warnLight}40`}>
-        <Lbl color={C.warnLight}>Symptom Checker</Lbl>
-        {SYMPTOM_FLAGS.map((f,i) => (
-          <div key={i} style={{ display:"flex", gap:"10px", padding:"9px 0", borderBottom:i<SYMPTOM_FLAGS.length-1?`1px solid ${C.iron}`:"none", alignItems:"flex-start" }}>
-            <span style={{ fontSize:"18px", flexShrink:0 }}>{f.icon}</span>
+      <Card border={`${C.orange}30`} bg={C.orangePale}>
+        <Lbl color={C.orange}>Symptom Checker</Lbl>
+        {SYMPTOM_FLAGS.map((f,i)=>(
+          <div key={i} style={{display:"flex",gap:"12px",padding:"12px 0",borderBottom:i<SYMPTOM_FLAGS.length-1?`1px solid ${C.orange}20`:"none",alignItems:"flex-start"}}>
+            <span style={{fontSize:"22px",flexShrink:0}}>{f.icon}</span>
             <div>
-              <div style={{ fontFamily:bar, fontSize:"12px", letterSpacing:"1px", textTransform:"uppercase", color:f.severity==="urgent"?C.redLight:f.severity==="call"?C.warnLight:C.goldMid }}>{f.label}</div>
-              <div style={{ fontFamily:cor, fontSize:"13px", fontStyle:"italic", color:C.ash, marginTop:"3px", lineHeight:"1.5" }}>{f.action}</div>
+              <div style={{fontFamily:bar,fontSize:TS.label,textTransform:"uppercase",color:f.severity==="urgent"?C.redLight:f.severity==="call"?C.orange:C.warn,fontWeight:700}}>{f.label}</div>
+              <div style={{fontFamily:cor,fontSize:TS.bodySm,fontStyle:"italic",color:C.textSecondary,marginTop:"4px",lineHeight:"1.6"}}>{f.action}</div>
             </div>
           </div>
         ))}
@@ -1043,25 +1180,25 @@ function SupportScreen() {
 }
 
 // ══════════════════════════════════════════════════════════════════════════════
-// NORMAL
+// IS THIS NORMAL
 // ══════════════════════════════════════════════════════════════════════════════
 function NormalScreen() {
-  const [open, setOpen] = useState(null);
+  const [open,setOpen]=useState(null);
   return (
-    <div style={{ padding:"14px 14px 80px", maxWidth:640, margin:"0 auto" }}>
-      <Card border={`${C.warnLight}50`} bg={`${C.blue}12`}>
-        <div style={{ fontFamily:bb, fontSize:"22px", letterSpacing:"2px", color:C.warnLight, marginBottom:"6px" }}>❓ Is This Normal?</div>
-        <div style={{ fontFamily:cor, fontSize:"14px", fontStyle:"italic", color:C.ash, lineHeight:"1.6" }}>You Googled it at 2am and found something terrifying. Stop. Read this instead.</div>
+    <div style={{padding:"16px 16px 90px",maxWidth:640,margin:"0 auto"}}>
+      <Card border={`${C.orange}40`} bg={C.orangePale}>
+        <div style={{fontFamily:bb,fontSize:TS.heading,letterSpacing:"1px",color:C.orange,marginBottom:"8px"}}>❓ Is This Normal?</div>
+        <div style={{fontFamily:cor,fontSize:TS.body,fontStyle:"italic",color:C.textSecondary,lineHeight:"1.7"}}>You Googled it at 2am and found something terrifying. Stop. Read this instead.</div>
       </Card>
-      {NORMAL_LIBRARY.map((item,i) => (
-        <div key={i} style={{ marginBottom:"6px", border:`1px solid ${open===i?`${C.goldMid}60`:C.iron}`, borderRadius:"3px", background:open===i?`${C.blue}18`:C.obs }}>
-          <div onClick={() => setOpen(open===i?null:i)} style={{ padding:"13px 14px", cursor:"pointer", display:"flex", justifyContent:"space-between", alignItems:"center", userSelect:"none" }}>
-            <span style={{ fontFamily:cor, fontSize:"15px", color:open===i?C.white:C.bone, flex:1, paddingRight:"12px", lineHeight:"1.4" }}>{item.q}</span>
-            <span style={{ color:C.steel, fontSize:"12px", flexShrink:0 }}>{open===i?"▲":"▼"}</span>
+      {NORMAL_LIBRARY.map((item,i)=>(
+        <div key={i} style={{marginBottom:"8px",border:`1.5px solid ${open===i?C.navyMid:C.border}`,borderRadius:"12px",background:open===i?C.navyPale:C.white,boxShadow:"0 1px 4px rgba(13,30,61,0.06)"}}>
+          <div onClick={()=>setOpen(open===i?null:i)} style={{padding:"16px",cursor:"pointer",display:"flex",justifyContent:"space-between",alignItems:"center",userSelect:"none"}}>
+            <span style={{fontFamily:cor,fontSize:TS.body,color:open===i?C.navy:C.textPrimary,flex:1,paddingRight:"14px",lineHeight:"1.5",fontWeight:open===i?600:400}}>{item.q}</span>
+            <span style={{color:C.textMuted,fontSize:"14px",flexShrink:0}}>{open===i?"▲":"▼"}</span>
           </div>
-          {open===i && (
-            <div style={{ padding:"0 14px 14px", borderTop:`1px solid ${C.iron}` }}>
-              <div style={{ fontFamily:cor, fontSize:"15px", color:C.bone, lineHeight:"1.8", paddingTop:"12px" }}>{item.a}</div>
+          {open===i&&(
+            <div style={{padding:"0 16px 16px",borderTop:`1px solid ${C.border}`}}>
+              <div style={{fontFamily:cor,fontSize:TS.body,color:C.textPrimary,lineHeight:"1.9",paddingTop:"14px"}}>{item.a}</div>
             </div>
           )}
         </div>
@@ -1074,51 +1211,44 @@ function NormalScreen() {
 // WIN WALL
 // ══════════════════════════════════════════════════════════════════════════════
 function WinWallScreen({ wins, checkins, onAddWin, onBack }) {
-  const [text, setText] = useState("");
-  const [search, setSearch] = useState("");
-  const days = daysSince();
-
-  const add = () => {
-    if (!text.trim()) return;
-    onAddWin({ text:text.trim(), day:days, date:new Date().toDateString() });
-    setText("");
-  };
-
-  const sq = search.toLowerCase();
-  const allEntries = [
-    ...wins.map(w => ({...w, entryType:"win"})),
-    ...checkins.map(c => ({ text:`Day ${c.day} · Pain ${c.pain}/10 · ${c.swelling} swelling · feeling ${c.mood}`, day:c.day, date:c.date, entryType:"checkin" }))
-  ].sort((a,b) => b.day - a.day);
-  const filtered = sq ? allEntries.filter(e => e.text.toLowerCase().includes(sq) || String(e.day).includes(sq)) : wins.slice().reverse().map(w=>({...w,entryType:"win"}));
-
+  const [text,setText]=useState("");
+  const [search,setSearch]=useState("");
+  const days=daysSince();
+  const add=()=>{if(!text.trim())return;onAddWin({text:text.trim(),day:days,date:new Date().toDateString()});setText("");};
+  const sq=search.toLowerCase();
+  const allEntries=[
+    ...wins.map(w=>({...w,entryType:"win"})),
+    ...checkins.map(c=>({text:`Day ${c.day} · Pain ${c.pain}/10 · ${c.swelling} swelling · feeling ${c.mood}`,day:c.day,date:c.date,entryType:"checkin"})),
+  ].sort((a,b)=>b.day-a.day);
+  const filtered=sq?allEntries.filter(e=>e.text.toLowerCase().includes(sq)||String(e.day).includes(sq)):wins.slice().reverse().map(w=>({...w,entryType:"win"}));
   return (
-    <div style={{ padding:"14px 14px 80px", maxWidth:640, margin:"0 auto" }}>
-      <Ghost onClick={onBack} style={{ marginBottom:"14px" }}>← Back</Ghost>
-      <Card border={`${C.goldMid}60`} bg={`${C.blue}15`}>
-        <div style={{ fontFamily:bb, fontSize:"28px", letterSpacing:"3px", color:C.goldBright, marginBottom:"4px" }}>🏆 Win Wall & Journal</div>
-        <div style={{ fontFamily:cor, fontSize:"14px", fontStyle:"italic", color:C.ash, lineHeight:"1.6" }}>Every win, every check-in. Searchable. Permanent.</div>
-      </Card>
+    <div style={{padding:"16px 16px 90px",maxWidth:640,margin:"0 auto"}}>
+      <Ghost onClick={onBack} style={{marginBottom:"16px"}}>← Back</Ghost>
+      <div style={{background:`linear-gradient(135deg,${C.navyDeep},${C.navyMid})`,borderRadius:"14px",padding:"22px",marginBottom:"12px"}}>
+        <div style={{fontFamily:bb,fontSize:TS.display,letterSpacing:"3px",color:C.goldBright,marginBottom:"6px"}}>🏆 Win Wall & Journal</div>
+        <div style={{fontFamily:cor,fontSize:TS.body,fontStyle:"italic",color:"rgba(255,255,255,0.8)",lineHeight:"1.7"}}>Every win, every check-in. Searchable. Permanent.</div>
+      </div>
       <Card>
         <Lbl>Search Your Recovery Journal</Lbl>
         <Inp value={search} onChange={e=>setSearch(e.target.value)} placeholder='Try "crutches", "pain 3", "great", or a day number...'/>
-        {search && <div style={{ fontFamily:bar, fontSize:"9px", letterSpacing:"2px", color:C.ash, marginTop:"8px", textTransform:"uppercase" }}>{filtered.length} results</div>}
+        {search&&<div style={{fontFamily:bar,fontSize:TS.labelSm,color:C.textSecondary,marginTop:"10px",textTransform:"uppercase"}}>{filtered.length} results</div>}
       </Card>
-      {!search && (
+      {!search&&(
         <Card>
           <Lbl>Log a Win</Lbl>
           <Inp value={text} onChange={e=>setText(e.target.value)} placeholder="e.g. First quad set without pain. Slept 5 hours. Bent to 90°."/>
-          <Btn onClick={add} full style={{ marginTop:"10px" }}>+ Add Win</Btn>
+          <Btn onClick={add} full bg={C.navyMid} style={{marginTop:"12px"}}>+ Add Win</Btn>
         </Card>
       )}
-      {filtered.length === 0 ? (
-        <Card><div style={{ fontFamily:cor, fontSize:"14px", fontStyle:"italic", color:C.steel, textAlign:"center", padding:"20px 0" }}>{search?"No entries match that search.":"Your wins appear here."}</div></Card>
-      ) : (
-        filtered.map((e,i) => (
-          <div key={i} style={{ display:"flex", gap:"12px", padding:"12px", marginBottom:"8px", background:C.char, border:`1px solid ${e.entryType==="win"?C.iron:C.steel}`, borderRadius:"3px", alignItems:"flex-start" }}>
-            <span style={{ fontSize:"18px", flexShrink:0 }}>{e.entryType==="win"?"🏆":"📋"}</span>
+      {filtered.length===0?(
+        <Card><div style={{fontFamily:cor,fontSize:TS.body,fontStyle:"italic",color:C.textMuted,textAlign:"center",padding:"24px 0"}}>{search?"No entries match that search.":"Your wins appear here."}</div></Card>
+      ):(
+        filtered.map((e,i)=>(
+          <div key={i} style={{display:"flex",gap:"14px",padding:"14px",marginBottom:"10px",background:e.entryType==="win"?C.goldPale:C.offwhite,border:`1px solid ${e.entryType==="win"?`${C.goldMid}60`:C.border}`,borderRadius:"10px",alignItems:"flex-start"}}>
+            <span style={{fontSize:"22px",flexShrink:0}}>{e.entryType==="win"?"🏆":"📋"}</span>
             <div>
-              <div style={{ fontFamily:cor, fontSize:"14px", color:C.white, lineHeight:"1.5" }}>{e.text}</div>
-              <div style={{ fontFamily:bar, fontSize:"9px", letterSpacing:"2px", color:C.steel, marginTop:"5px", textTransform:"uppercase" }}>Day {e.day} · {e.date}</div>
+              <div style={{fontFamily:cor,fontSize:TS.body,color:C.textPrimary,lineHeight:"1.6"}}>{e.text}</div>
+              <div style={{fontFamily:bar,fontSize:TS.labelSm,color:C.textMuted,marginTop:"6px",textTransform:"uppercase"}}>Day {e.day} · {e.date}</div>
             </div>
           </div>
         ))
@@ -1128,325 +1258,217 @@ function WinWallScreen({ wins, checkins, onAddWin, onBack }) {
 }
 
 // ══════════════════════════════════════════════════════════════════════════════
-// WHY
+// CAREGIVER
 // ══════════════════════════════════════════════════════════════════════════════
-function WhyScreen({ wins, days, phase, checkins, checked }) {
-  const [mission, setMission] = useState(() => loadRaw("ax_mission_v2",""));
-  const [editM, setEditM] = useState(false);
-  const [draft, setDraft] = useState("");
-  const [photos, setPhotos] = useState(() => load("ax_photos_v2",[]));
-  const [storageKB, setStorageKB] = useState(0);
-  const [err, setErr] = useState("");
-  const [weeklyReport, setWeeklyReport] = useState(() => loadRaw("ax_weekly_report",""));
-  const [weeklyDate, setWeeklyDate] = useState(() => loadRaw("ax_weekly_report_date",""));
-  const [loadingReport, setLoadingReport] = useState(false);
-  const fileRef = useRef(null);
-
-  const getKB = () => { try { let t=0; for(let k in localStorage){ if(localStorage.hasOwnProperty(k)) t+=(localStorage[k].length+k.length)*2; } return Math.round(t/1024); } catch{return 0;} };
-  useEffect(() => setStorageKB(getKB()), [photos]);
-
-  const saveMission = () => { setMission(draft); saveRaw("ax_mission_v2",draft); setEditM(false); };
-
-  const handlePhoto = (e) => {
-    const f = e.target.files[0]; if(!f) return; setErr("");
-    if (f.size > 1.5*1024*1024) { setErr("Photo too large (max 1.5MB)."); e.target.value=""; return; }
-    const r = new FileReader();
-    r.onload = (ev) => {
-      const url = ev.target.result;
-      if (getKB()+(url.length/1024) > 4800) { setErr("Storage full. Delete some photos."); return; }
-      const u = [...photos, { id:Date.now(), dataUrl:url, caption:"" }];
-      setPhotos(u); save("ax_photos_v2",u);
-    };
-    r.readAsDataURL(f); e.target.value="";
+function CaregiverScreen({ days, phase, checkins, wins, checked, romLog, onBack }) {
+  const today=new Date().toDateString();
+  const todayCI=checkins.find(c=>c.date===today);
+  const latestRom=romLog.length?romLog[romLog.length-1]:null;
+  const romTarget=ROM_CONFIG.phaseTargets[phase.id]||ROM_CONFIG.phaseTargets[5];
+  const doneGoals=phase.goals.filter((_,i)=>checked[`${phase.id}-${i}`]);
+  const recentWins=wins.slice(-5);
+  const readiness=calcReadiness(checkins,checked,phase);
+  const [include,setInclude]=useState({phase:true,readiness:!!readiness,checkin:true,rom:!!latestRom,goals:true,wins:recentWins.length>0});
+  const [caregiverName,setCaregiverName]=useState(()=>loadRaw("ax_caregiver_name",""));
+  const [copied,setCopied]=useState(false);
+  const toggle=(key)=>setInclude(s=>({...s,[key]:!s[key]}));
+  const saveName=(v)=>{setCaregiverName(v);saveRaw("ax_caregiver_name",v);};
+  const buildMessage=()=>{
+    const lines=[];
+    lines.push(`${caregiverName?`Hi ${caregiverName} —`:"Recovery update —"} Day ${days} post-op.\n`);
+    if(include.phase)lines.push(`📍 Phase: ${phase.name} (${phase.weeks})`);
+    if(include.readiness&&readiness){lines.push(`\n⚡ Recovery Readiness: ${readiness.total}/100 — ${readiness.label}`);lines.push(readiness.advice);}
+    if(include.checkin&&todayCI){lines.push(`\n📋 Today's Check-in`);lines.push(`Pain: ${todayCI.pain}/10`);lines.push(`Swelling: ${todayCI.swelling}`);lines.push(`Mood: ${todayCI.mood}`);}
+    else if(include.checkin)lines.push(`\n📋 No check-in logged yet today.`);
+    if(include.rom&&latestRom){lines.push(`\n📐 Range of Motion (${latestRom.date})`);ROM_CONFIG.sides.forEach(side=>{const val=latestRom.vals?.[side]??latestRom[side.toLowerCase()]??0;const pct=Math.min(100,Math.round((val/romTarget)*100));lines.push(`${side} ${ROM_CONFIG.joint}: ${val}${ROM_CONFIG.unit} (${pct}% of ${romTarget}${ROM_CONFIG.unit} target)`);});}
+    if(include.goals){lines.push(`\n✅ Phase Goals: ${doneGoals.length}/${phase.goals.length} complete`);doneGoals.slice(-3).forEach(g=>lines.push(`  · ${g}`));if(doneGoals.length>3)lines.push(`  · ...and ${doneGoals.length-3} more`);}
+    if(include.wins&&recentWins.length>0){lines.push(`\n🏆 Recent Wins`);recentWins.slice(-3).forEach(w=>lines.push(`  · ${w.text}`));}
+    lines.push(`\n— Sent from APEXRX`);
+    return lines.join("\n");
   };
-  const delPhoto = (id) => { const u=photos.filter(p=>p.id!==id); setPhotos(u); save("ax_photos_v2",u); setErr(""); };
-  const updCaption = (id,cap) => { const u=photos.map(p=>p.id===id?{...p,caption:cap}:p); setPhotos(u); save("ax_photos_v2",u); };
-  const moodHistory = checkins.slice(-30);
-
-  const generateWeekly = async () => {
-    setLoadingReport(true);
-    const recent7 = checkins.slice(-7);
-    if (recent7.length === 0) { setWeeklyReport("Log at least one check-in this week to generate your report."); setLoadingReport(false); return; }
-    const avgPain = Math.round(recent7.reduce((a,c)=>a+c.pain,0)/recent7.length*10)/10;
-    const moodDist = recent7.map(c=>c.mood).join(", ");
-    const weekWins = wins.filter(w=>w.day>=days-7).map(w=>w.text).join("; ");
-    const readiness = calcReadiness(checkins,checked,phase);
-    const prompt = `You are APEXRX, a recovery companion for someone who had bilateral patellar tendon repair surgery on March 16, 2026. Today is Day ${days} post-op in the ${phase.name} phase.
-
-This week: ${recent7.length} check-ins, average pain ${avgPain}/10, moods: ${moodDist}, wins: ${weekWins||"none"}, readiness score: ${readiness?.total||"N/A"}/100.
-Their "why": ${mission||"not yet written"}.
-
-Write a weekly recovery narrative — one beautifully written paragraph of 80–120 words. Personal, emotionally resonant, specific to this week's actual data. End with one forward-looking sentence connected to their "why." Do not use generic recovery language.`;
-    const text = await callClaude(prompt);
-    setWeeklyReport(text); saveRaw("ax_weekly_report",text);
-    const today = new Date().toLocaleDateString("en-US",{month:"long",day:"numeric",year:"numeric"});
-    setWeeklyDate(today); saveRaw("ax_weekly_report_date",today);
-    setLoadingReport(false);
-  };
-
+  const message=buildMessage();
+  const copyMsg=()=>{navigator.clipboard?.writeText(message).then(()=>{setCopied(true);setTimeout(()=>setCopied(false),2000);});};
+  const OPTIONS=[
+    {key:"phase",label:"Current Phase",available:true},
+    {key:"readiness",label:"Readiness Score",available:!!readiness},
+    {key:"checkin",label:"Today's Check-in",available:true},
+    {key:"rom",label:"Range of Motion",available:!!latestRom},
+    {key:"goals",label:"Phase Goals Progress",available:true},
+    {key:"wins",label:"Recent Wins",available:recentWins.length>0},
+  ];
   return (
-    <div style={{ padding:"14px 14px 80px", maxWidth:640, margin:"0 auto" }}>
-
-      <Card border={`${C.goldMid}60`} bg={`${C.blue}15`}>
-        <div style={{ display:"flex", justifyContent:"space-between", alignItems:"flex-start", marginBottom:"12px" }}>
-          <div>
-            <Lbl mb={2}>Weekly Report</Lbl>
-            <div style={{ fontFamily:bar, fontSize:"9px", letterSpacing:"1px", color:C.steel, textTransform:"uppercase" }}>{weeklyDate||"Not yet generated"}</div>
-          </div>
-          <Btn onClick={generateWeekly} sm bg={C.goldBright} color={C.black} disabled={loadingReport}>{loadingReport?"Writing...":"Generate"}</Btn>
+    <div style={{minHeight:"100vh",background:C.page,color:C.textPrimary,fontFamily:cor}}>
+      <div style={{padding:"16px 16px 90px",maxWidth:640,margin:"0 auto"}}>
+        <Ghost onClick={onBack} style={{marginBottom:"16px"}}>← Back</Ghost>
+        <div style={{background:`linear-gradient(135deg,${C.navyDeep},${C.navyMid})`,borderRadius:"14px",padding:"22px",marginBottom:"12px"}}>
+          <div style={{fontFamily:bb,fontSize:TS.display,letterSpacing:"3px",color:C.goldBright,marginBottom:"6px"}}>💬 Caregiver Update</div>
+          <div style={{fontFamily:cor,fontSize:TS.body,fontStyle:"italic",color:"rgba(255,255,255,0.8)",lineHeight:"1.7"}}>Send your partner a clear, structured update — what's been done, where things stand, how you're doing.</div>
         </div>
-        {weeklyReport ? (
-          <div style={{ fontFamily:cor, fontSize:"16px", fontStyle:"italic", color:C.white, lineHeight:"1.9", borderLeft:`3px solid ${C.goldMid}`, paddingLeft:"16px" }}>{weeklyReport}</div>
-        ) : (
-          <div style={{ fontFamily:cor, fontSize:"14px", fontStyle:"italic", color:C.steel, lineHeight:"1.7" }}>Your week, written from your actual data. Tap Generate.</div>
-        )}
-      </Card>
-
-      <Card border={`${C.gold}50`}>
-        <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:"10px" }}>
-          <Lbl mb={0}>My Why</Lbl>
-          <Ghost onClick={() => { setDraft(mission); setEditM(true); }} color={C.goldMid}>{mission?"Edit":"+ Write Yours"}</Ghost>
-        </div>
-        {editM ? (
-          <div>
-            <TA value={draft} onChange={e=>setDraft(e.target.value)} rows={5} placeholder="What are you recovering for? The moments, the people, the life..."/>
-            <div style={{ display:"flex", gap:"8px", marginTop:"10px" }}>
-              <Btn onClick={saveMission} full>Save My Why</Btn>
-              <Ghost onClick={() => setEditM(false)}>Cancel</Ghost>
-            </div>
-          </div>
-        ) : mission ? (
-          <div style={{ fontFamily:cor, fontSize:"17px", fontStyle:"italic", color:C.white, lineHeight:"1.8", borderLeft:`3px solid ${C.goldMid}`, paddingLeft:"16px" }}>{mission}</div>
-        ) : (
-          <div style={{ fontFamily:cor, fontSize:"14px", fontStyle:"italic", color:C.steel, lineHeight:"1.7" }}>Write your why — the moments, the people, the life you're climbing back to.</div>
-        )}
-      </Card>
-
-      {moodHistory.length > 0 && (
         <Card>
-          <Lbl>Comeback Timeline</Lbl>
-          <div style={{ display:"flex", gap:"3px", alignItems:"flex-end", height:"60px", marginBottom:"8px" }}>
-            {moodHistory.map((c,i) => {
-              const h = c.pain<=3?8:c.pain<=6?16:c.pain<=8?24:32;
-              const col = c.pain<=3?C.greenLight:c.pain<=6?C.goldMid:c.pain<=8?C.warnLight:C.redLight;
-              return <div key={i} style={{ flex:1, height:`${h}px`, background:col, borderRadius:"1px", minWidth:"4px" }}/>;
-            })}
-          </div>
-          <div style={{ display:"flex", justifyContent:"space-between", fontFamily:bar, fontSize:"9px", letterSpacing:"1px", color:C.steel, textTransform:"uppercase" }}><span>↑ High Pain</span><span>Low Pain ↓</span></div>
-          <div style={{ fontFamily:cor, fontSize:"12px", fontStyle:"italic", color:C.steel, marginTop:"6px" }}>Last {moodHistory.length} check-ins. Every shorter bar is progress.</div>
+          <Lbl>Caregiver's Name</Lbl>
+          <Inp value={caregiverName} onChange={e=>saveName(e.target.value)} placeholder="e.g. Sarah, Mom, Coach..."/>
         </Card>
-      )}
-
-      <Card>
-        <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:"10px" }}>
-          <Lbl mb={0}>My Moments</Lbl>
-          <Btn onClick={() => { setErr(""); fileRef.current?.click(); }} sm>+ Photo</Btn>
-        </div>
-        {storageKB > 0 && (
-          <div style={{ marginBottom:"10px" }}>
-            <div style={{ display:"flex", justifyContent:"space-between", fontFamily:bar, fontSize:"9px", color:storageKB>4000?C.redLight:C.steel, textTransform:"uppercase", letterSpacing:"1px", marginBottom:"4px" }}><span>Storage</span><span>{storageKB}KB / 5000KB</span></div>
-            <div style={{ height:"3px", background:C.iron, borderRadius:"2px", overflow:"hidden" }}>
-              <div style={{ width:`${Math.min(100,(storageKB/5000)*100)}%`, height:"100%", background:storageKB>4000?C.redLight:storageKB>3000?C.warnLight:C.greenLight }}/>
-            </div>
-          </div>
-        )}
-        {err && <div style={{ background:`${C.red}20`, border:`1px solid ${C.redLight}`, borderRadius:"3px", padding:"10px 12px", marginBottom:"10px", display:"flex", justifyContent:"space-between", alignItems:"center" }}><span style={{ fontFamily:cor, fontSize:"13px", fontStyle:"italic", color:C.bone, flex:1 }}>⚠️ {err}</span><button onClick={() => setErr("")} style={{ background:"transparent", border:"none", color:C.ash, cursor:"pointer", fontSize:"16px" }}>×</button></div>}
-        <input ref={fileRef} type="file" accept="image/*" onChange={handlePhoto} style={{ display:"none" }}/>
-        {photos.length === 0 ? (
-          <div style={{ textAlign:"center", padding:"28px 16px" }}>
-            <div style={{ fontSize:"32px", opacity:0.3, marginBottom:"10px" }}>📸</div>
-            <div style={{ fontFamily:cor, fontSize:"14px", fontStyle:"italic", color:C.steel, lineHeight:"1.6" }}>Add photos of the moments you're climbing back to.</div>
-          </div>
-        ) : (
-          <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:"8px" }}>
-            {photos.map(p => (
-              <div key={p.id} style={{ position:"relative", borderRadius:"3px", overflow:"hidden", border:`1px solid ${C.iron}` }}>
-                <img src={p.dataUrl} alt={p.caption||"moment"} style={{ width:"100%", aspectRatio:"1", objectFit:"cover", display:"block" }}/>
-                <button onClick={() => delPhoto(p.id)} style={{ position:"absolute", top:"6px", right:"6px", background:"rgba(8,12,20,0.88)", border:"none", color:C.ash, cursor:"pointer", fontSize:"14px", borderRadius:"2px", padding:"2px 7px" }}>×</button>
-                <div style={{ background:"rgba(8,12,20,0.88)", padding:"6px 8px" }}>
-                  <input value={p.caption} onChange={e=>updCaption(p.id,e.target.value)} placeholder="Caption..." style={{ background:"transparent", border:"none", color:C.bone, fontSize:"12px", fontFamily:cor, fontStyle:"italic", width:"100%", outline:"none", padding:0 }}/>
-                </div>
+        <Card>
+          <Lbl>Include in Message</Lbl>
+          {OPTIONS.map(opt=>(
+            <div key={opt.key} onClick={()=>opt.available&&toggle(opt.key)} style={{display:"flex",alignItems:"center",gap:"14px",padding:"12px 0",borderBottom:`1px solid ${C.border}`,cursor:opt.available?"pointer":"default",opacity:opt.available?1:0.4}}>
+              <div style={{width:"22px",height:"22px",borderRadius:"6px",flexShrink:0,border:`2px solid ${include[opt.key]&&opt.available?C.navyMid:C.borderMid}`,background:include[opt.key]&&opt.available?C.navyMid:C.white,display:"flex",alignItems:"center",justifyContent:"center",fontSize:"12px",color:C.white}}>
+                {include[opt.key]&&opt.available&&"✓"}
               </div>
-            ))}
-          </div>
-        )}
-        {photos.length > 0 && <Ghost onClick={() => fileRef.current?.click()} style={{ width:"100%", marginTop:"10px", textAlign:"center" }}>+ Add Another</Ghost>}
-      </Card>
-
-      <Card>
-        <Lbl>Win Summary</Lbl>
-        <div style={{ fontFamily:bb, fontSize:"40px", letterSpacing:"3px", color:C.goldBright, textAlign:"center", marginBottom:"6px" }}>{wins.length}</div>
-        <div style={{ fontFamily:cor, fontSize:"14px", fontStyle:"italic", color:C.ash, textAlign:"center" }}>wins logged so far</div>
-        {wins.length > 0 && <div style={{ fontFamily:cor, fontSize:"13px", fontStyle:"italic", color:C.steel, textAlign:"center", marginTop:"8px", borderTop:`1px solid ${C.iron}`, paddingTop:"10px" }}>"{wins[wins.length-1].text}"</div>}
-      </Card>
+              <div style={{flex:1}}>
+                <div style={{fontFamily:bar,fontSize:TS.label,color:include[opt.key]&&opt.available?C.textPrimary:C.textMuted,textTransform:"uppercase"}}>{opt.label}</div>
+                {!opt.available&&<div style={{fontFamily:cor,fontSize:TS.caption,fontStyle:"italic",color:C.textMuted,marginTop:"3px"}}>No data yet</div>}
+              </div>
+            </div>
+          ))}
+        </Card>
+        <Card bg={C.offwhite}>
+          <Lbl mb={12}>Message Preview</Lbl>
+          <div style={{fontFamily:cor,fontSize:TS.bodySm,color:C.textPrimary,lineHeight:"1.9",whiteSpace:"pre-wrap"}}>{message}</div>
+        </Card>
+        <Btn onClick={()=>{window.location.href=`sms:&body=${encodeURIComponent(message)}`;}} full bg={C.navyMid} style={{marginBottom:"10px"}}>📱 Open in Messages</Btn>
+        <Btn onClick={copyMsg} full bg={copied?C.greenLight:C.textSecondary}>{copied?"✓ Copied to Clipboard!":"📋 Copy Text"}</Btn>
+        <div style={{fontFamily:cor,fontSize:TS.caption,fontStyle:"italic",color:C.textMuted,textAlign:"center",marginTop:"14px",lineHeight:"1.8"}}>
+          "Open in Messages" works on iPhone once deployed.<br/>"Copy Text" works everywhere.
+        </div>
+      </div>
     </div>
   );
 }
 
 // ══════════════════════════════════════════════════════════════════════════════
-// CAREGIVER UPDATE
+// WHY
 // ══════════════════════════════════════════════════════════════════════════════
-function CaregiverScreen({ days, phase, checkins, wins, checked, romLog, onBack }) {
-  const today = new Date().toDateString();
-  const todayCI = checkins.find(c => c.date === today);
-  const recent7 = checkins.slice(-7);
-  const latestRom = romLog.length ? romLog[romLog.length - 1] : null;
-  const romTarget = ROM_CONFIG.phaseTargets[phase.id] || ROM_CONFIG.phaseTargets[5];
-  const doneGoals = phase.goals.filter((_,i) => checked[`${phase.id}-${i}`]);
-  const recentWins = wins.slice(-5);
-  const readiness = calcReadiness(checkins, checked, phase);
-
-  const [include, setInclude] = useState({
-    checkin: true,
-    readiness: true,
-    rom: !!latestRom,
-    goals: true,
-    wins: recentWins.length > 0,
-    phase: true,
-  });
-  const [caregiverName, setCaregiverName] = useState(() => loadRaw("ax_caregiver_name", ""));
-  const [copied, setCopied] = useState(false);
-
-  const toggle = (key) => setInclude(s => ({...s, [key]: !s[key]}));
-  const saveName = (v) => { setCaregiverName(v); saveRaw("ax_caregiver_name", v); };
-
-  const buildMessage = () => {
-    const lines = [];
-    const greeting = caregiverName ? `Hi ${caregiverName} —` : "Recovery update —";
-    lines.push(`${greeting} Day ${days} post-op update.\n`);
-
-    if (include.phase) {
-      lines.push(`📍 Phase: ${phase.name} (${phase.weeks})`);
-    }
-
-    if (include.readiness && readiness) {
-      lines.push(`\n⚡ Recovery Readiness: ${readiness.total}/100 — ${readiness.label}`);
-      lines.push(`${readiness.advice}`);
-    }
-
-    if (include.checkin && todayCI) {
-      lines.push(`\n📋 Today's Check-in`);
-      lines.push(`Pain: ${todayCI.pain}/10`);
-      lines.push(`Swelling: ${todayCI.swelling}`);
-      lines.push(`Mood: ${todayCI.mood}`);
-    } else if (include.checkin && !todayCI) {
-      lines.push(`\n📋 No check-in logged yet today.`);
-    }
-
-    if (include.rom && latestRom) {
-      lines.push(`\n📐 Range of Motion (${latestRom.date})`);
-      ROM_CONFIG.sides.forEach(side => {
-        const val = latestRom.vals?.[side] ?? latestRom[side.toLowerCase()] ?? 0;
-        const pct = Math.min(100, Math.round((val / romTarget) * 100));
-        lines.push(`${side} ${ROM_CONFIG.joint}: ${val}${ROM_CONFIG.unit} (${pct}% of ${romTarget}${ROM_CONFIG.unit} target)`);
-      });
-    }
-
-    if (include.goals) {
-      const total = phase.goals.length;
-      lines.push(`\n✅ Phase Goals: ${doneGoals.length}/${total} complete`);
-      if (doneGoals.length > 0) {
-        doneGoals.slice(-3).forEach(g => lines.push(`  · ${g}`));
-        if (doneGoals.length > 3) lines.push(`  · ...and ${doneGoals.length - 3} more`);
-      }
-    }
-
-    if (include.wins && recentWins.length > 0) {
-      lines.push(`\n🏆 Recent Wins`);
-      recentWins.slice(-3).forEach(w => lines.push(`  · ${w.text}`));
-    }
-
-    lines.push(`\n— Sent from APEXRX`);
-    return lines.join("\n");
+function WhyScreen({ wins, days, phase, checkins, checked }) {
+  const [mission,setMission]=useState(()=>loadRaw("ax_mission_v2",""));
+  const [editM,setEditM]=useState(false);
+  const [draft,setDraft]=useState("");
+  const [photos,setPhotos]=useState(()=>load("ax_photos_v2",[]));
+  const [storageKB,setStorageKB]=useState(0);
+  const [err,setErr]=useState("");
+  const [weeklyReport,setWeeklyReport]=useState(()=>loadRaw("ax_weekly_report",""));
+  const [weeklyDate,setWeeklyDate]=useState(()=>loadRaw("ax_weekly_report_date",""));
+  const [loadingReport,setLoadingReport]=useState(false);
+  const fileRef=useRef(null);
+  const getKB=()=>{try{let t=0;for(let k in localStorage){if(localStorage.hasOwnProperty(k))t+=(localStorage[k].length+k.length)*2;}return Math.round(t/1024);}catch{return 0;}};
+  useEffect(()=>setStorageKB(getKB()),[photos]);
+  const saveMission=()=>{setMission(draft);saveRaw("ax_mission_v2",draft);setEditM(false);};
+  const handlePhoto=(e)=>{const f=e.target.files[0];if(!f)return;setErr("");if(f.size>1.5*1024*1024){setErr("Photo too large (max 1.5MB).");e.target.value="";return;}const r=new FileReader();r.onload=(ev)=>{const url=ev.target.result;if(getKB()+(url.length/1024)>4800){setErr("Storage full. Delete some photos.");return;}const u=[...photos,{id:Date.now(),dataUrl:url,caption:""}];setPhotos(u);save("ax_photos_v2",u);};r.readAsDataURL(f);e.target.value="";};
+  const delPhoto=(id)=>{const u=photos.filter(p=>p.id!==id);setPhotos(u);save("ax_photos_v2",u);setErr("");};
+  const updCaption=(id,cap)=>{const u=photos.map(p=>p.id===id?{...p,caption:cap}:p);setPhotos(u);save("ax_photos_v2",u);};
+  const moodHistory=checkins.slice(-30);
+  const generateWeekly=async()=>{
+    setLoadingReport(true);
+    const recent7=checkins.slice(-7);
+    if(!recent7.length){setWeeklyReport("Log at least one check-in this week.");setLoadingReport(false);return;}
+    const avgPain=Math.round(recent7.reduce((a,c)=>a+c.pain,0)/recent7.length*10)/10;
+    const moodDist=recent7.map(c=>c.mood).join(", ");
+    const weekWins=wins.filter(w=>w.day>=days-7).map(w=>w.text).join("; ");
+    const readiness=calcReadiness(checkins,checked,phase);
+    const prompt=`You are APEXRX, a recovery companion for someone who had bilateral patellar tendon repair surgery on March 16, 2026. Today is Day ${days} post-op in the ${phase.name} phase. This week: ${recent7.length} check-ins, average pain ${avgPain}/10, moods: ${moodDist}, wins: ${weekWins||"none"}, readiness score: ${readiness?.total||"N/A"}/100. Their "why": ${mission||"not yet written"}. Write a weekly recovery narrative — one beautifully written paragraph of 80–120 words. Personal, emotionally resonant, specific to this week's actual data. End with one forward-looking sentence connected to their "why." Do not use generic recovery language.`;
+    const text=await callClaude(prompt);
+    setWeeklyReport(text);saveRaw("ax_weekly_report",text);
+    const today=new Date().toLocaleDateString("en-US",{month:"long",day:"numeric",year:"numeric"});
+    setWeeklyDate(today);saveRaw("ax_weekly_report_date",today);
+    setLoadingReport(false);
   };
-
-  const message = buildMessage();
-  const encoded = encodeURIComponent(message);
-
-  const copyMsg = () => {
-    navigator.clipboard?.writeText(message).then(() => {
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    });
-  };
-
-  const OPTIONS = [
-    { key:"phase",     label:"Current Phase",       available: true },
-    { key:"readiness", label:"Readiness Score",      available: !!readiness },
-    { key:"checkin",   label:"Today's Check-in",     available: true },
-    { key:"rom",       label:"Range of Motion",      available: !!latestRom },
-    { key:"goals",     label:"Phase Goals Progress", available: true },
-    { key:"wins",      label:"Recent Wins",          available: recentWins.length > 0 },
-  ];
 
   return (
-    <div style={{ minHeight:"100vh", background:C.black, color:C.white, fontFamily:cor }}>
-      <div style={{ padding:"14px 14px 80px", maxWidth:640, margin:"0 auto" }}>
-        <Ghost onClick={onBack} style={{ marginBottom:"14px" }}>← Back</Ghost>
+    <div style={{padding:"16px 16px 90px",maxWidth:640,margin:"0 auto"}}>
+      <SectionHeader title="My Why" subtitle="The reason you show up every day" accent={C.redLight}/>
 
-        <Card border={`${C.goldMid}60`} bg={`${C.blue}15`}>
-          <div style={{ fontFamily:bb, fontSize:"24px", letterSpacing:"3px", color:C.goldBright, marginBottom:"4px" }}>💬 Caregiver Update</div>
-          <div style={{ fontFamily:cor, fontSize:"14px", fontStyle:"italic", color:C.ash, lineHeight:"1.6" }}>
-            Send your partner a clear, structured update — what's been done, where things stand, how you're doing.
+      <Card border={`${C.navyMid}30`} bg={C.navyPale}>
+        <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:"14px"}}>
+          <div>
+            <Lbl color={C.navyMid} mb={4}>Weekly Report</Lbl>
+            <div style={{fontFamily:bar,fontSize:TS.labelSm,color:C.textMuted,textTransform:"uppercase"}}>{weeklyDate||"Not yet generated"}</div>
           </div>
-        </Card>
-
-        {/* Caregiver name */}
-        <Card>
-          <Lbl>Caregiver's Name</Lbl>
-          <Inp value={caregiverName} onChange={e => saveName(e.target.value)} placeholder="e.g. Sarah, Mom, Coach..." />
-        </Card>
-
-        {/* Choose what to include */}
-        <Card>
-          <Lbl>Include in Message</Lbl>
-          {OPTIONS.map(opt => (
-            <div key={opt.key} onClick={() => opt.available && toggle(opt.key)}
-              style={{ display:"flex", alignItems:"center", gap:"12px", padding:"10px 0",
-                borderBottom:`1px solid ${C.iron}`, cursor:opt.available?"pointer":"default",
-                opacity:opt.available?1:0.4 }}>
-              <div style={{ width:"20px", height:"20px", borderRadius:"3px", flexShrink:0,
-                border:`1.5px solid ${include[opt.key]&&opt.available?C.goldBright:C.steel}`,
-                background:include[opt.key]&&opt.available?C.goldBright:"transparent",
-                display:"flex", alignItems:"center", justifyContent:"center",
-                fontSize:"11px", color:C.black }}>
-                {include[opt.key] && opt.available && "✓"}
-              </div>
-              <div style={{ flex:1 }}>
-                <div style={{ fontFamily:bar, fontSize:"13px", letterSpacing:"1px", color:include[opt.key]&&opt.available?C.white:C.ash, textTransform:"uppercase" }}>{opt.label}</div>
-                {!opt.available && <div style={{ fontFamily:cor, fontSize:"11px", fontStyle:"italic", color:C.steel, marginTop:"2px" }}>No data yet</div>}
-              </div>
-            </div>
-          ))}
-        </Card>
-
-        {/* Message preview */}
-        <Card border={`${C.iron}`} bg={C.char}>
-          <Lbl mb={10}>Message Preview</Lbl>
-          <div style={{ fontFamily:cor, fontSize:"14px", color:C.bone, lineHeight:"1.8", whiteSpace:"pre-wrap" }}>{message}</div>
-        </Card>
-
-        {/* Send actions */}
-        <Btn
-          onClick={() => { window.location.href = `sms:&body=${encoded}`; }}
-          full bg={C.goldBright} color={C.black}
-          style={{ fontSize:"13px", marginBottom:"8px" }}
-        >
-          📱 Open in Messages
-        </Btn>
-        <Btn
-          onClick={copyMsg}
-          full bg={copied ? C.greenLight : C.steel} color={C.white}
-          style={{ fontSize:"13px" }}
-        >
-          {copied ? "✓ Copied to Clipboard!" : "📋 Copy Text"}
-        </Btn>
-
-        <div style={{ fontFamily:cor, fontSize:"12px", fontStyle:"italic", color:C.ash, textAlign:"center", marginTop:"12px", lineHeight:"1.8" }}>
-          "Open in Messages" works on iPhone once deployed.<br/>
-          "Copy Text" works everywhere — paste into any app.
+          <Btn onClick={generateWeekly} sm bg={C.navyMid} disabled={loadingReport}>{loadingReport?"Writing...":"Generate"}</Btn>
         </div>
-      </div>
+        {weeklyReport?(
+          <div style={{fontFamily:bar,fontSize:TS.body,color:C.textPrimary,lineHeight:"1.9",borderLeft:`3px solid ${C.navyMid}`,paddingLeft:"18px",fontWeight:600}}>{weeklyReport}</div>
+        ):(
+          <div style={{fontFamily:bar,fontSize:TS.body,color:C.textSecondary,lineHeight:"1.8",fontWeight:600}}>Your week, written from your actual check-in data. Tap Generate.</div>
+        )}
+      </Card>
+
+      <Card border={`${C.redLight}40`} bg={`#fff8f8`}>
+        <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:"12px"}}>
+          <Lbl color={C.red} mb={0}>My Why</Lbl>
+          <Ghost onClick={()=>{setDraft(mission);setEditM(true);}} color={C.red}>{mission?"Edit":"+ Write Yours"}</Ghost>
+        </div>
+        {editM?(
+          <div>
+            <TA value={draft} onChange={e=>setDraft(e.target.value)} rows={5} placeholder="What are you recovering for? The moments, the people, the life..."/>
+            <div style={{display:"flex",gap:"10px",marginTop:"12px"}}>
+              <Btn onClick={saveMission} full bg={C.red}>Save My Why</Btn>
+              <Ghost onClick={()=>setEditM(false)}>Cancel</Ghost>
+            </div>
+          </div>
+        ):mission?(
+          <div style={{fontFamily:cor,fontSize:TS.body,fontStyle:"italic",color:C.textPrimary,lineHeight:"1.9",borderLeft:`3px solid ${C.redLight}`,paddingLeft:"18px"}}>{mission}</div>
+        ):(
+          <div style={{fontFamily:bar,fontSize:TS.body,color:C.textMuted,lineHeight:"1.8",fontWeight:600}}>Write your why — the moments, the people, the life you're climbing back to.</div>
+        )}
+      </Card>
+
+      {moodHistory.length>0&&(
+        <Card>
+          <Lbl>Comeback Timeline</Lbl>
+          <div style={{display:"flex",gap:"3px",alignItems:"flex-end",height:"64px",marginBottom:"10px"}}>
+            {moodHistory.map((c,i)=>{
+              const h=c.pain<=3?10:c.pain<=6?20:c.pain<=8?32:44;
+              const col=c.pain<=3?C.greenLight:c.pain<=6?C.blueLight:c.pain<=8?C.orangeLight:C.redLight;
+              return <div key={i} style={{flex:1,height:`${h}px`,background:col,borderRadius:"2px",minWidth:"4px"}}/>;
+            })}
+          </div>
+          <div style={{display:"flex",justifyContent:"space-between",fontFamily:bar,fontSize:TS.labelSm,color:C.textMuted,textTransform:"uppercase"}}><span>↑ High Pain</span><span>Low Pain ↓</span></div>
+          <div style={{fontFamily:bar,fontSize:TS.caption,color:C.textMuted,marginTop:"8px",fontWeight:600}}>Last {moodHistory.length} check-ins. Every shorter bar is progress.</div>
+        </Card>
+      )}
+
+      <Card>
+        <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:"12px"}}>
+          <Lbl mb={0}>My Moments</Lbl>
+          <Btn onClick={()=>{setErr("");fileRef.current?.click();}} sm bg={C.navyMid}>+ Photo</Btn>
+        </div>
+        {storageKB>0&&(
+          <div style={{marginBottom:"12px"}}>
+            <div style={{display:"flex",justifyContent:"space-between",fontFamily:bar,fontSize:TS.labelSm,color:storageKB>4000?C.redLight:C.textMuted,textTransform:"uppercase",marginBottom:"6px"}}><span>Storage</span><span>{storageKB}KB / 5000KB</span></div>
+            <div style={{height:"4px",background:C.border,borderRadius:"2px",overflow:"hidden"}}>
+              <div style={{width:`${Math.min(100,(storageKB/5000)*100)}%`,height:"100%",background:storageKB>4000?C.redLight:storageKB>3000?C.orangeLight:C.greenLight}}/>
+            </div>
+          </div>
+        )}
+        {err&&<div style={{background:C.redPale,border:`1px solid ${C.redLight}`,borderRadius:"8px",padding:"12px 14px",marginBottom:"12px",display:"flex",justifyContent:"space-between",alignItems:"center"}}><span style={{fontFamily:cor,fontSize:TS.bodySm,fontStyle:"italic",color:C.red,flex:1}}>⚠️ {err}</span><button onClick={()=>setErr("")} style={{background:"transparent",border:"none",color:C.textMuted,cursor:"pointer",fontSize:"18px"}}>×</button></div>}
+        <input ref={fileRef} type="file" accept="image/*" onChange={handlePhoto} style={{display:"none"}}/>
+        {photos.length===0?(
+          <div style={{textAlign:"center",padding:"32px 16px"}}>
+            <div style={{fontSize:"36px",opacity:0.3,marginBottom:"12px"}}>📸</div>
+            <div style={{fontFamily:cor,fontSize:TS.body,fontStyle:"italic",color:C.textMuted,lineHeight:"1.7"}}>Add photos of the moments you're climbing back to.</div>
+          </div>
+        ):(
+          <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"10px"}}>
+            {photos.map(p=>(
+              <div key={p.id} style={{position:"relative",borderRadius:"10px",overflow:"hidden",border:`1px solid ${C.border}`}}>
+                <img src={p.dataUrl} alt={p.caption||"moment"} style={{width:"100%",aspectRatio:"1",objectFit:"cover",display:"block"}}/>
+                <button onClick={()=>delPhoto(p.id)} style={{position:"absolute",top:"8px",right:"8px",background:"rgba(255,255,255,0.92)",border:"none",color:C.textSecondary,cursor:"pointer",fontSize:"14px",borderRadius:"6px",padding:"3px 8px",fontWeight:700}}>×</button>
+                <div style={{background:"rgba(255,255,255,0.95)",padding:"8px 10px"}}>
+                  <input value={p.caption} onChange={e=>updCaption(p.id,e.target.value)} placeholder="Caption..." style={{background:"transparent",border:"none",color:C.textSecondary,fontSize:TS.caption,fontFamily:cor,fontStyle:"italic",width:"100%",outline:"none",padding:0}}/>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+        {photos.length>0&&<Ghost onClick={()=>fileRef.current?.click()} style={{width:"100%",marginTop:"12px",textAlign:"center"}}>+ Add Another</Ghost>}
+      </Card>
+
+      <Card bg={C.goldPale} border={`${C.goldMid}50`}>
+        <Lbl color={C.goldDeep}>Win Summary</Lbl>
+        <div style={{fontFamily:bb,fontSize:"56px",letterSpacing:"3px",color:C.goldDeep,textAlign:"center",marginBottom:"8px"}}>{wins.length}</div>
+        <div style={{fontFamily:cor,fontSize:TS.body,fontStyle:"italic",color:C.textSecondary,textAlign:"center"}}>wins logged so far</div>
+        {wins.length>0&&<div style={{fontFamily:cor,fontSize:TS.bodySm,fontStyle:"italic",color:C.textSecondary,textAlign:"center",marginTop:"10px",borderTop:`1px solid ${C.goldMid}30`,paddingTop:"12px"}}>"{wins[wins.length-1].text}"</div>}
+      </Card>
     </div>
   );
 }
@@ -1455,61 +1477,56 @@ function CaregiverScreen({ days, phase, checkins, wins, checked, romLog, onBack 
 // TRAVEL
 // ══════════════════════════════════════════════════════════════════════════════
 function TravelScreen({ days }) {
-  const phase = getPhase(days);
-  const [trips, setTrips] = useState(() => load("ax_trips_v2",[]));
-  const [name, setName] = useState(""); const [date, setDate] = useState("");
-  const add = () => {
-    if (!name.trim()||!date) return;
-    const d=new Date(date+"T12:00:00"), off=Math.round((d-SURGERY_DATE)/86400000);
-    const p=getPhase(Math.max(0,off));
-    const t={id:Date.now(),name:name.trim(),date,offset:off,phaseId:p.id,phaseName:p.name,risk:p.travelRisk,note:p.travelNote};
-    const u=[...trips,t].sort((a,b)=>a.date.localeCompare(b.date)); setTrips(u); save("ax_trips_v2",u); setName(""); setDate("");
-  };
-  const del = (id) => { const u=trips.filter(t=>t.id!==id); setTrips(u); save("ax_trips_v2",u); };
+  const phase=getPhase(days);
+  const [trips,setTrips]=useState(()=>load("ax_trips_v2",[]));
+  const [name,setName]=useState(""); const [date,setDate]=useState("");
+  const add=()=>{if(!name.trim()||!date)return;const d=new Date(date+"T12:00:00"),off=Math.round((d-SURGERY_DATE)/86400000);const p=getPhase(Math.max(0,off));const t={id:Date.now(),name:name.trim(),date,offset:off,phaseId:p.id,phaseName:p.name,risk:p.travelRisk,note:p.travelNote};const u=[...trips,t].sort((a,b)=>a.date.localeCompare(b.date));setTrips(u);save("ax_trips_v2",u);setName("");setDate("");};
+  const del=(id)=>{const u=trips.filter(t=>t.id!==id);setTrips(u);save("ax_trips_v2",u);};
   return (
-    <div style={{ padding:"14px 14px 80px", maxWidth:640, margin:"0 auto" }}>
-      <Card border={`${RISK_COLOR[phase.travelRisk]}60`} bg={`${C.blue}15`}>
+    <div style={{padding:"16px 16px 90px",maxWidth:640,margin:"0 auto"}}>
+      <SectionHeader title="Travel" subtitle="Know when it's safe to go" accent={C.blue}/>
+      <Card border={`${RISK_COLOR[phase.travelRisk]}50`} bg={RISK_PALE[phase.travelRisk]}>
         <Lbl>Current Travel Status</Lbl>
-        <div style={{ fontFamily:bb, fontSize:"28px", letterSpacing:"3px", color:RISK_COLOR[phase.travelRisk], marginBottom:"8px" }}>{RISK_LABEL[phase.travelRisk]}</div>
-        <div style={{ fontFamily:cor, fontSize:"14px", fontStyle:"italic", color:C.bone, lineHeight:"1.6" }}>{phase.travelNote}</div>
+        <div style={{fontFamily:bb,fontSize:TS.display,letterSpacing:"3px",color:RISK_COLOR[phase.travelRisk],marginBottom:"10px"}}>{RISK_LABEL[phase.travelRisk]}</div>
+        <div style={{fontFamily:cor,fontSize:TS.body,fontStyle:"italic",color:C.textPrimary,lineHeight:"1.7"}}>{phase.travelNote}</div>
       </Card>
       <Card>
         <Lbl>Phase-by-Phase Guide</Lbl>
-        {PHASES.map((p,i) => (
-          <div key={p.id} style={{ display:"flex", gap:"10px", padding:"10px 0", borderBottom:i<PHASES.length-1?`1px solid ${C.iron}`:"none" }}>
-            <div style={{ width:"8px", height:"8px", borderRadius:"50%", background:RISK_COLOR[p.travelRisk], marginTop:"5px", flexShrink:0 }}/>
+        {PHASES.map((p,i)=>(
+          <div key={p.id} style={{display:"flex",gap:"12px",padding:"12px 0",borderBottom:i<PHASES.length-1?`1px solid ${C.border}`:"none"}}>
+            <div style={{width:"12px",height:"12px",borderRadius:"50%",background:RISK_COLOR[p.travelRisk],marginTop:"5px",flexShrink:0}}/>
             <div>
-              <div style={{ display:"flex", justifyContent:"space-between" }}>
-                <span style={{ fontFamily:bb, fontSize:"15px", letterSpacing:"1px", color:p.id===phase.id?C.goldBright:C.bone }}>{p.icon} {p.name}</span>
-                <span style={{ fontFamily:bar, fontSize:"9px", color:C.steel, textTransform:"uppercase" }}>{p.weeks}</span>
+              <div style={{display:"flex",justifyContent:"space-between"}}>
+                <span style={{fontFamily:bb,fontSize:TS.subhead,letterSpacing:"1px",color:p.id===phase.id?C.navy:C.textPrimary,fontWeight:p.id===phase.id?700:400}}>{p.icon} {p.name}</span>
+                <span style={{fontFamily:bar,fontSize:TS.labelSm,color:C.textMuted,textTransform:"uppercase"}}>{p.weeks}</span>
               </div>
-              <div style={{ fontFamily:cor, fontSize:"12px", fontStyle:"italic", color:C.ash, marginTop:"3px", lineHeight:"1.5" }}>{p.travelNote}</div>
+              <div style={{fontFamily:cor,fontSize:TS.bodySm,fontStyle:"italic",color:C.textSecondary,marginTop:"4px",lineHeight:"1.6"}}>{p.travelNote}</div>
             </div>
           </div>
         ))}
       </Card>
       <Card>
         <Lbl>Plan a Work Trip</Lbl>
-        <Inp value={name} onChange={e=>setName(e.target.value)} placeholder="Trip name (e.g. Holzer Health — Gallipolis, OH)" style={{ marginBottom:"8px" }}/>
-        <Inp type="date" value={date} onChange={e=>setDate(e.target.value)} style={{ marginBottom:"10px", colorScheme:"dark" }}/>
-        <Btn onClick={add} full>+ Add Trip</Btn>
+        <Inp value={name} onChange={e=>setName(e.target.value)} placeholder="Trip name (e.g. Holzer Health — Gallipolis, OH)" style={{marginBottom:"10px"}}/>
+        <Inp type="date" value={date} onChange={e=>setDate(e.target.value)} style={{marginBottom:"12px",colorScheme:"light"}}/>
+        <Btn onClick={add} full bg={C.navyMid}>+ Add Trip</Btn>
       </Card>
-      {trips.length > 0 && (
+      {trips.length>0&&(
         <Card>
           <Lbl>Planned Trips</Lbl>
-          {trips.map(t => {
-            const rc=RISK_COLOR[t.risk], wk=Math.floor(t.offset/7);
+          {trips.map(t=>{
+            const rc=RISK_COLOR[t.risk],rp=RISK_PALE[t.risk],wk=Math.floor(t.offset/7);
             return (
-              <div key={t.id} style={{ border:`1px solid ${rc}40`, borderRadius:"3px", padding:"12px", marginBottom:"8px", background:`${rc}08` }}>
-                <div style={{ display:"flex", justifyContent:"space-between", alignItems:"flex-start" }}>
+              <div key={t.id} style={{border:`1.5px solid ${rc}40`,borderRadius:"10px",padding:"14px",marginBottom:"10px",background:rp}}>
+                <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start"}}>
                   <div>
-                    <div style={{ fontFamily:bb, fontSize:"18px", letterSpacing:"2px", color:C.white }}>{t.name}</div>
-                    <div style={{ fontFamily:bar, fontSize:"10px", letterSpacing:"1px", color:C.ash, marginTop:"2px", textTransform:"uppercase" }}>{fmtDate(new Date(t.date+"T12:00:00"))} · Wk {wk} · {t.phaseName}</div>
+                    <div style={{fontFamily:bb,fontSize:TS.heading,letterSpacing:"1px",color:C.navy}}>{t.name}</div>
+                    <div style={{fontFamily:bar,fontSize:TS.labelSm,color:C.textSecondary,marginTop:"4px",textTransform:"uppercase"}}>{fmtDate(new Date(t.date+"T12:00:00"))} · Wk {wk} · {t.phaseName}</div>
                   </div>
-                  <button onClick={() => del(t.id)} style={{ background:"transparent", border:"none", color:C.steel, cursor:"pointer", fontSize:"20px" }}>×</button>
+                  <button onClick={()=>del(t.id)} style={{background:"transparent",border:"none",color:C.textMuted,cursor:"pointer",fontSize:"22px"}}>×</button>
                 </div>
-                <div style={{ fontFamily:bb, fontSize:"16px", letterSpacing:"2px", color:rc, marginTop:"8px" }}>{RISK_LABEL[t.risk]}</div>
-                <div style={{ fontFamily:cor, fontSize:"12px", fontStyle:"italic", color:C.ash, marginTop:"4px", lineHeight:"1.5" }}>{t.note}</div>
+                <div style={{fontFamily:bb,fontSize:TS.subhead,letterSpacing:"1px",color:rc,marginTop:"10px"}}>{RISK_LABEL[t.risk]}</div>
+                <div style={{fontFamily:cor,fontSize:TS.bodySm,fontStyle:"italic",color:C.textSecondary,marginTop:"6px",lineHeight:"1.6"}}>{t.note}</div>
               </div>
             );
           })}
@@ -1522,79 +1539,73 @@ function TravelScreen({ days }) {
 // ══════════════════════════════════════════════════════════════════════════════
 // ROOT
 // ══════════════════════════════════════════════════════════════════════════════
+const TABS = [
+  { id:"home",     emoji:"🏠", label:"Home" },
+  { id:"recovery", emoji:"🛡️",label:"Recover" },
+  { id:"meds",     emoji:"💊", label:"Meds" },
+  { id:"pt",       emoji:"🤲", label:"PT" },
+  { id:"why",      emoji:"❤️", label:"Why" },
+  { id:"timeline", emoji:"📅", label:"Timeline" },
+  { id:"support",  emoji:null, label:"Support" },
+];
+
 function App() {
-  const days = daysSince();
-  const phase = getPhase(days);
-  const [tab, setTab] = useState("home");
-  const [screen, setScreen] = useState(null);
-  const [checked, setChecked] = useState(() => load("ax_checked_v2",{}));
-  const [notes, setNotes] = useState(() => load("ax_notes_v2",{}));
-  const [checkins, setCheckins] = useState(() => load("ax_checkins_v2",[]));
-  const [wins, setWins] = useState(() => load("ax_wins_v2",[]));
+  const days=daysSince(), phase=getPhase(days);
+  const [tab,setTab]=useState("home");
+  const [screen,setScreen]=useState(null);
+  const [checked,setChecked]=useState(()=>load("ax_checked_v2",{}));
+  const [notes,setNotes]=useState(()=>load("ax_notes_v2",{}));
+  const [checkins,setCheckins]=useState(()=>load("ax_checkins_v2",[]));
+  const [wins,setWins]=useState(()=>load("ax_wins_v2",[]));
+  const [romLog,setRomLog]=useState(()=>load("ax_rom_v2",[]));
 
-  const onCheck = (pid, idx) => {
-    const k=`${pid}-${idx}`, u={...checked,[k]:!checked[k]};
-    setChecked(u); save("ax_checked_v2",u);
-    if (!checked[k]) {
-      const g=PHASES.find(p=>p.id===pid)?.goals[idx];
-      if (g) { const wu=[...wins,{text:g,day:days,date:new Date().toDateString()}]; setWins(wu); save("ax_wins_v2",wu); }
-    }
-  };
-  const onSaveNote = (pid,text) => { const u={...notes,[pid]:text}; setNotes(u); save("ax_notes_v2",u); };
-  const onCheckin = (ci) => { const u=[...checkins,ci]; setCheckins(u); save("ax_checkins_v2",u); };
-  const onAddWin = (w) => { const u=[...wins,w]; setWins(u); save("ax_wins_v2",u); };
+  const onCheck=(pid,idx)=>{const k=`${pid}-${idx}`,u={...checked,[k]:!checked[k]};setChecked(u);save("ax_checked_v2",u);if(!checked[k]){const g=PHASES.find(p=>p.id===pid)?.goals[idx];if(g){const wu=[...wins,{text:g,day:days,date:new Date().toDateString()}];setWins(wu);save("ax_wins_v2",wu);}}};
+  const onSaveNote=(pid,text)=>{const u={...notes,[pid]:text};setNotes(u);save("ax_notes_v2",u);};
+  const onCheckin=(ci)=>{const u=[...checkins,ci];setCheckins(u);save("ax_checkins_v2",u);};
+  const onAddWin=(w)=>{const u=[...wins,w];setWins(u);save("ax_wins_v2",u);};
 
-  const TABS = [
-    { id:"home",     emoji:"🏠", label:"Home" },
-    { id:"recovery", emoji:"🛡️",label:"Recover" },
-    { id:"meds",     emoji:"💊", label:"Meds" },
-    { id:"pt",       emoji:"🤲", label:"PT" },
-    { id:"why",      emoji:"❤️", label:"Why" },
-    { id:"support",  emoji:null, label:"Support" },
-  ];
-
-  const [romLog, setRomLog] = useState(() => load("ax_rom_v2", []));
-
-  if (screen==="wins") return <div style={{ minHeight:"100vh", background:C.black, color:C.white, fontFamily:cor }}><WinWallScreen wins={wins} checkins={checkins} onAddWin={onAddWin} onBack={()=>setScreen(null)}/></div>;
-  if (screen==="caregiver") return <CaregiverScreen days={days} phase={phase} checkins={checkins} wins={wins} checked={checked} romLog={romLog} onBack={()=>setScreen(null)}/>;
-  if (screen==="travel") return <div style={{ minHeight:"100vh", background:C.black, color:C.white, fontFamily:cor }}><div style={{ padding:"14px 14px 0", maxWidth:640, margin:"0 auto" }}><Ghost onClick={()=>setScreen(null)} style={{ marginBottom:"4px" }}>← Back</Ghost></div><TravelScreen days={days}/></div>;
-  if (screen==="normal") return <div style={{ minHeight:"100vh", background:C.black, color:C.white, fontFamily:cor }}><div style={{ padding:"14px 14px 0", maxWidth:640, margin:"0 auto" }}><Ghost onClick={()=>setScreen(null)} style={{ marginBottom:"4px" }}>← Back</Ghost></div><NormalScreen/></div>;
+  if(screen==="wins")      return <div style={{minHeight:"100vh",background:C.page,fontFamily:cor}}><WinWallScreen wins={wins} checkins={checkins} onAddWin={onAddWin} onBack={()=>setScreen(null)}/></div>;
+  if(screen==="timeline")  return <div style={{minHeight:"100vh",background:C.page,fontFamily:cor}}><TimelineScreen days={days} onBack={()=>setScreen(null)}/></div>;
+  if(screen==="caregiver") return <CaregiverScreen days={days} phase={phase} checkins={checkins} wins={wins} checked={checked} romLog={romLog} onBack={()=>setScreen(null)}/>;
+  if(screen==="travel")    return <div style={{minHeight:"100vh",background:C.page,fontFamily:cor}}><div style={{padding:"16px 16px 0",maxWidth:640,margin:"0 auto"}}><Ghost onClick={()=>setScreen(null)} style={{marginBottom:"6px"}}>← Back</Ghost></div><TravelScreen days={days}/></div>;
+  if(screen==="normal")    return <div style={{minHeight:"100vh",background:C.page,fontFamily:cor}}><div style={{padding:"16px 16px 0",maxWidth:640,margin:"0 auto"}}><Ghost onClick={()=>setScreen(null)} style={{marginBottom:"6px"}}>← Back</Ghost></div><NormalScreen/></div>;
 
   return (
-    <div style={{ minHeight:"100vh", background:C.black, color:C.white, fontFamily:cor }}>
-      {/* Top bar */}
-      <div style={{ position:"sticky", top:0, zIndex:30, background:C.obs, borderBottom:`1px solid ${C.iron}`, padding:"11px 16px", display:"flex", alignItems:"center", justifyContent:"space-between" }}>
-        <div style={{ display:"flex", alignItems:"center", gap:"10px" }}>
-          <Mark s={26}/>
+    <div style={{minHeight:"100vh",background:C.page,color:C.textPrimary,fontFamily:cor}}>
+
+      {/* Top bar — deep navy */}
+      <div style={{position:"sticky",top:0,zIndex:30,background:`linear-gradient(135deg,${C.navyDeep},${C.navy})`,padding:"13px 18px",display:"flex",alignItems:"center",justifyContent:"space-between",boxShadow:"0 2px 12px rgba(6,20,40,0.3)"}}>
+        <div style={{display:"flex",alignItems:"center",gap:"12px"}}>
+          <Mark s={30}/>
           <div>
-            <div style={{ fontFamily:bb, fontSize:"20px", letterSpacing:"4px", lineHeight:1 }}>
-              <span style={{ color:C.white }}>APEX</span><span style={{ color:C.goldBright }}>RX</span>
+            <div style={{fontFamily:bb,fontSize:"22px",letterSpacing:"4px",lineHeight:1,color:C.white}}>
+              APEX<span style={{color:C.goldBright}}>RX</span>
             </div>
-            <div style={{ fontFamily:bar, fontSize:"8px", letterSpacing:"3px", color:C.steel, textTransform:"uppercase" }}>v2.2</div>
+            <div style={{fontFamily:bar,fontSize:TS.labelSm,letterSpacing:"3px",color:"rgba(255,255,255,0.5)",textTransform:"uppercase"}}>v3.0</div>
           </div>
         </div>
-        <div style={{ textAlign:"right" }}>
-          <div style={{ fontFamily:bb, fontSize:"22px", letterSpacing:"2px", color:C.goldBright, lineHeight:1 }}>Day {days}</div>
-          <div style={{ fontFamily:bar, fontSize:"8px", letterSpacing:"2px", color:C.goldMid, textTransform:"uppercase" }}>{phase.icon} {phase.name}</div>
+        <div style={{textAlign:"right"}}>
+          <div style={{fontFamily:bb,fontSize:"26px",letterSpacing:"2px",color:C.goldBright,lineHeight:1}}>Day {days}</div>
+          <div style={{fontFamily:bar,fontSize:TS.labelSm,letterSpacing:"2px",color:"rgba(255,255,255,0.7)",textTransform:"uppercase"}}>{phase.icon} {phase.name}</div>
         </div>
       </div>
 
-      {tab==="home"     && <HomeScreen days={days} phase={phase} checkins={checkins} wins={wins} checked={checked} onCheckin={onCheckin} onNav={setScreen}/>}
-      {tab==="recovery" && <RecoveryScreen days={days} checked={checked} onCheck={onCheck} notes={notes} onSaveNote={onSaveNote}/>}
-      {tab==="meds"     && <MedsScreen/>}
-      {tab==="pt"       && <PTScreen days={days} checkins={checkins} checked={checked} wins={wins}/>}
-      {tab==="why"      && <WhyScreen wins={wins} days={days} phase={phase} checkins={checkins} checked={checked}/>}
-      {tab==="support"  && <SupportScreen/>}
+      {tab==="home"     &&<HomeScreen days={days} phase={phase} checkins={checkins} wins={wins} checked={checked} onCheckin={onCheckin} onNav={setScreen} setScreen={setScreen}/>}
+      {tab==="recovery" &&<RecoveryScreen days={days} checked={checked} onCheck={onCheck} notes={notes} onSaveNote={onSaveNote}/>}
+      {tab==="meds"     &&<MedsScreen/>}
+      {tab==="pt"       &&<PTScreen days={days} checkins={checkins} checked={checked} wins={wins}/>}
+      {tab==="why"      &&<WhyScreen wins={wins} days={days} phase={phase} checkins={checkins} checked={checked}/>}
+      {tab==="timeline" &&<TimelineScreen days={days} onBack={()=>setTab("home")}/>}
+      {tab==="support"  &&<SupportScreen/>}
 
-      {/* Bottom nav */}
-      <div style={{ position:"fixed", bottom:0, left:0, right:0, zIndex:30, background:C.obs, borderTop:`1px solid ${C.iron}`, display:"flex", paddingBottom:"env(safe-area-inset-bottom,0px)" }}>
-        {TABS.map(t => {
-          const active = tab === t.id;
-          const ic = active ? (t.id==="support"?C.blueLight:C.goldBright) : C.ash;
+      {/* Bottom nav — deep navy */}
+      <div style={{position:"fixed",bottom:0,left:0,right:0,zIndex:30,background:`linear-gradient(180deg,${C.navy},${C.navyDeep})`,borderTop:`1px solid rgba(255,255,255,0.08)`,display:"flex",paddingBottom:"env(safe-area-inset-bottom,0px)",boxShadow:"0 -2px 12px rgba(6,20,40,0.25)"}}>
+        {TABS.map(t=>{
+          const active=tab===t.id;
           return (
-            <button key={t.id} onClick={() => setTab(t.id)} style={{ flex:1, padding:"10px 1px 9px", background:"transparent", border:"none", borderTop:`2px solid ${active?(t.id==="support"?C.blueLight:C.goldBright):"transparent"}`, cursor:"pointer", display:"flex", flexDirection:"column", alignItems:"center", gap:"3px" }}>
-              {t.emoji ? <span style={{ fontSize:"17px", lineHeight:1 }}>{t.emoji}</span> : <Caduceus size={19} color={ic}/>}
-              <span style={{ fontFamily:bar, fontSize:"8px", letterSpacing:"1px", textTransform:"uppercase", color:active?(t.id==="support"?C.blueLight:C.goldBright):C.steel }}>{t.label}</span>
+            <button key={t.id} onClick={()=>setTab(t.id)} style={{flex:1,padding:"11px 2px 10px",background:"transparent",border:"none",borderTop:`2px solid ${active?C.goldBright:"transparent"}`,cursor:"pointer",display:"flex",flexDirection:"column",alignItems:"center",gap:"4px"}}>
+              {t.emoji?<span style={{fontSize:"20px",lineHeight:1}}>{t.emoji}</span>:<Caduceus size={22} color={active?C.goldBright:"rgba(255,255,255,0.5)"}/>}
+              <span style={{fontFamily:bar,fontSize:TS.labelSm,letterSpacing:"1px",textTransform:"uppercase",color:active?C.goldBright:"rgba(255,255,255,0.5)"}}>{t.label}</span>
             </button>
           );
         })}
